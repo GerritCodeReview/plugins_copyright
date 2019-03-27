@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7648a72_14bf93a0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "Perhaps: \"Initial release of copyright scanner library\"",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 6,
+        "endChar": 7
+      },
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "363b7b35_5498f086",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "nit: can make this easier to read by leaving out this word, e.g.\n\n This copyright scanner library was developed for the purpose of\n determining \u003c...\u003e",
+      "range": {
+        "startLine": 8,
+        "startChar": 50,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a007715_74dfbc3f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "This is a bit jargony: maybe something like \"code that is not compliant with a project\u0027s policies around copyright\" would be more self explanatory",
+      "range": {
+        "startLine": 10,
+        "startChar": 10,
+        "endLine": 10,
+        "endChar": 34
+      },
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d02142b2_bed73afe",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "language nit: \"Revisions containing only first-party code\"",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 54
+      },
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b9a8ffe_6850c420",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "likewise: \"Revisions to files in locations where third-party code is allowed that consist of first-party code or appropriately licensed third-party code\"",
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b3b58c8_119b7c03",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1011842
+      },
+      "writtenOn": "2019-03-27T16:08:38Z",
+      "side": 1,
+      "message": "nit: This commit is in the context of the upstream release, so from that point of view it isn\u0027t external. I\u0027d just leave the word out (i.e. s/ externally//).",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 26
+      },
+      "revId": "38546f31fde4db9342d14509629ad3e411e58f55",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
