@@ -16,6 +16,7 @@
 
 readonly me=$(basename $0)
 readonly root=$(realpath $(dirname $0)/..)
+readonly build_flags="-c opt"
 
 if [ -z $1 ]; then
   echo >&2
@@ -36,9 +37,9 @@ fi
 
 readonly build_out=$(
   cd "${root}" >&2
-  bazel build -c opt :android_scan >&2
+  bazel build ${build_flags} :android_scan >&2
   echo -n $? " "
-  echo $(bazel info bazel-bin)
+  echo $(bazel info ${build_flags} bazel-bin)
 )
 rc=$(echo ${build_out} | cut -d\  -f1)
 if [ $rc -ne 0 ]; then
