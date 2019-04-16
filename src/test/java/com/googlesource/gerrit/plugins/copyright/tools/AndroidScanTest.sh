@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-readonly scanner="${TEST_SRCDIR}/copyright/android_scan"
-readonly testdata="${TEST_SRCDIR}/copyright/src/test/java/com/googlesource/gerrit/plugins/copyright/testdata"
+readonly root=$(dirname "${TEST_BINARY}")
+readonly scanner="${root}/android_scan"
+readonly testdata="${root}/src/test/java/com/googlesource/gerrit/plugins/copyright/testdata"
 
 function die() {
   echo -e "$@" >&2
