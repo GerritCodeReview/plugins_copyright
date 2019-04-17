@@ -301,6 +301,26 @@ public final class CopyrightScanner {
     this.copyright = buildPattern();
   }
 
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (other == null) {
+      return false;
+    }
+    if (other instanceof CopyrightScanner) {
+      CopyrightScanner otherScanner = (CopyrightScanner) other;
+      return copyright.equals(otherScanner.copyright);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return copyright.hashCode();
+  }
+
   /**
    * Scans `source` for copyright notices returning found license/author/owner information.
    *
@@ -979,8 +999,8 @@ public final class CopyrightScanner {
   public enum PartyType {
     FIRST_PARTY,
     THIRD_PARTY,
-    FORBIDDEN,
     UNKNOWN,
+    FORBIDDEN,
   }
 
   /** Identifies whether text matched by author/owner pattern or by license pattern. */
@@ -1014,11 +1034,11 @@ public final class CopyrightScanner {
     /** The character offset into the file where the match ends. */
     public int end;
 
-    Match(PartyType partyType, String text, int startLine, int endLine, int start, int end) {
+    public Match(PartyType partyType, String text, int startLine, int endLine, int start, int end) {
       this(partyType, MatchType.AUTHOR_OWNER, text, startLine, endLine, start, end);
     }
 
-    Match(
+    public Match(
         PartyType partyType,
         MatchType matchType,
         String text,

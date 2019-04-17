@@ -34,7 +34,9 @@ TEST_SRCS = "src/test/java/**/*Test.java"
 
 TEST_DEPS = PLUGIN_DEPS + PLUGIN_TEST_DEPS + [
     ":copyright_scanner",
+    "//lib/mockito",
     "@guava//jar",
+    "@mockito//jar",
 ]
 
 junit_tests(
