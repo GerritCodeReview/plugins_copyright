@@ -17,12 +17,13 @@ package com.googlesource.gerrit.plugins.copyright;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.MatchType.AUTHOR_OWNER;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.MatchType.LICENSE;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.FIRST_PARTY;
-import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.THIRD_PARTY;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.FORBIDDEN;
+import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.THIRD_PARTY;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.UNKNOWN;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -53,12 +54,13 @@ import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.PluginUser;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
+import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.restapi.change.ListChangeComments;
 import com.google.gerrit.server.restapi.change.PostReview;
-import com.google.inject.Singleton;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Match;
 import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.MatchType;
 import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType;
@@ -66,6 +68,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 /** Utility to report revision findings on the review thread. */
@@ -156,6 +160,108 @@ public class CopyrightReviewApi {
   }
 
   /**
+   * Reports failure findings from or about the check_new_config.sh tool on the review thread.
+   *
+   * <p>If no output found in the commit message, directs the submitter to run the tool and copy its
+   * output into the commit message.
+   *
+   * <p>If the output was found for a different scanner pattern, directs the submitter to run again
+   * for the current commit.
+   *
+   * <p>Otherwise, the duration of the timing run must exceed the configured limit. Describes
+   * patterns known to cause problems and directs the submitter to change the pattern.
+   *
+   * @param pluginName as installed in gerrit
+   * @param project identifies the All-Projects config for recording metrics
+   * @param oldConfig the prior state of the plugin configuration
+   * @param newConfig the new state of the plugin configuration
+   * @param event describes the pushed revision with the new configuration
+   * @param findings describes the line numbers, validity and timing run durations found
+   * @param maxElapsedSeconds the largest allows timing run duration in seconds
+   * @throws RestApiException if an error occurs updating the review thread
+   */
+  ReviewResult reportCommitMessageFindings(
+      String pluginName,
+      String project,
+      ScannerConfig oldConfig,
+      ScannerConfig newConfig,
+      RevisionCreatedListener.Event event,
+      ImmutableList<CommitMessageFinding> findings,
+      long maxElapsedSeconds)
+      throws RestApiException {
+    Preconditions.checkNotNull(newConfig);
+    Preconditions.checkNotNull(newConfig.scanner);
+    Preconditions.checkArgument(
+        oldConfig == null
+            || oldConfig.scanner == null
+            || !oldConfig.scanner.equals(newConfig.scanner));
+    Preconditions.checkArgument(
+        findings.size() != 1
+            || !findings.get(0).isValid()
+            || findings.get(0).elapsedMicros > maxElapsedSeconds * 1000000);
+    Preconditions.checkArgument(maxElapsedSeconds > 0);
+
+    long startNanos = System.nanoTime();
+    metrics.reviewCount.increment();
+    metrics.reviewCountByProject.increment(project);
+
+    int fromAccountId =
+        oldConfig != null && oldConfig.fromAccountId > 0
+            ? oldConfig.fromAccountId
+            : newConfig.fromAccountId;
+    ChangeResource change = getChange(event, fromAccountId);
+    ReviewInput ri = new ReviewInput();
+    ri.message(getCommitMessageMessage(pluginName, findings));
+    ImmutableList<CommentInput> comments =
+        getCommitMessageComments(pluginName, findings, maxElapsedSeconds);
+    ri.comments = ImmutableMap.of("/COMMIT_MSG", comments);
+    if (!Strings.isNullOrEmpty(oldConfig.reviewLabel)) {
+      ri.label(oldConfig.reviewLabel, -2);
+    } else if (!Strings.isNullOrEmpty(newConfig.reviewLabel)) {
+      ri.label(newConfig.reviewLabel, -2);
+    } else {
+      ri.label("Code-Review", -2);
+    }
+    return review(change, ri);
+  }
+
+  /**
+   * Returns a {@link com.google.gerrit.server.git.validators.CommitValidationException} describing
+   * failure findings from or about the check_new_config.sh tool.
+   *
+   * <p>If no output found in the commit message, directs the submitter to run the tool and copy its
+   * output into the commit message.
+   *
+   * <p>If the output was found for a different scanner pattern, directs the submitter to run again
+   * for the current commit.
+   *
+   * <p>Otherwise, the duration of the timing run must exceed the configured limit. Describes
+   * patterns known to cause problems and directs the submitter to change the pattern.
+   *
+   * @param pluginName as installed in gerrit
+   * @param findings describes the line numbers, validity and timing run durations found
+   * @param maxElapsedSeconds the largest allows timing run duration in seconds
+   */
+  public CommitValidationException getCommitMessageException(
+      String pluginName, ImmutableList<CommitMessageFinding> findings, long maxElapsedSeconds) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getCommitMessageMessage(pluginName, findings));
+    sb.append("\n\n");
+    ImmutableList<CommentInput> comments =
+        getCommitMessageComments(pluginName, findings, maxElapsedSeconds);
+    for (CommentInput ci : comments) {
+      if (ci.line != 0) {
+        sb.append("commit message line ");
+        sb.append(Integer.toString(ci.range.startLine));
+        sb.append(":\n");
+      }
+      sb.append(ci.message);
+      sb.append("\n");
+    }
+    return new CommitValidationException(sb.toString());
+  }
+
+  /**
    * Reports validation findings for a proposed new plugin configuration to the review thread for
    * the newly pushed revision.
    *
@@ -171,9 +277,10 @@ public class CopyrightReviewApi {
       String pluginName,
       String project,
       String path,
-      CopyrightConfig.ScannerConfig oldConfig,
-      CopyrightConfig.ScannerConfig newConfig,
-      RevisionCreatedListener.Event event) throws RestApiException {
+      ScannerConfig oldConfig,
+      ScannerConfig newConfig,
+      RevisionCreatedListener.Event event)
+      throws RestApiException {
     Preconditions.checkNotNull(newConfig);
     Preconditions.checkNotNull(newConfig.messages);
     Preconditions.checkArgument(!newConfig.messages.isEmpty());
@@ -186,13 +293,12 @@ public class CopyrightReviewApi {
       int fromAccountId =
           oldConfig != null && oldConfig.fromAccountId > 0
               ? oldConfig.fromAccountId
-                  : newConfig.fromAccountId;
+              : newConfig.fromAccountId;
       ChangeResource change = getChange(event, fromAccountId);
       StringBuilder message = new StringBuilder();
       message.append(pluginName);
       message.append(" plugin issues parsing new configuration");
-      ReviewInput ri = new ReviewInput()
-          .message(message.toString());
+      ReviewInput ri = new ReviewInput().message(message.toString());
 
       Map<String, List<CommentInfo>> priorComments = getComments(change);
       if (priorComments == null) {
@@ -240,9 +346,10 @@ public class CopyrightReviewApi {
    */
   ReviewResult reportScanFindings(
       String project,
-      CopyrightConfig.ScannerConfig scannerConfig,
+      ScannerConfig scannerConfig,
       RevisionCreatedListener.Event event,
-      Map<String, ImmutableList<Match>> findings) throws RestApiException {
+      Map<String, ImmutableList<Match>> findings)
+      throws RestApiException {
     long startNanos = System.nanoTime();
     metrics.reviewCount.increment();
     metrics.reviewCountByProject.increment(project);
@@ -266,9 +373,10 @@ public class CopyrightReviewApi {
         }
       }
       ChangeResource change = getChange(event, scannerConfig.fromAccountId);
-      ReviewInput ri = new ReviewInput()
-          .message("Copyright scan")
-          .label(scannerConfig.reviewLabel, reviewRequired ? -1 : +2);
+      ReviewInput ri =
+          new ReviewInput()
+              .message("Copyright scan")
+              .label(scannerConfig.reviewLabel, reviewRequired ? -1 : +2);
 
       if (reviewRequired) {
         ri = addReviewers(ri, scannerConfig.ccs, ReviewerState.CC);
@@ -288,7 +396,7 @@ public class CopyrightReviewApi {
       int numCommentsAdded = 0;
       for (Map.Entry<String, ImmutableList<Match>> entry : findings.entrySet()) {
         ImmutableList<CommentInput> newComments = null;
-        if (entry.getValue() == ALWAYS_REVIEW) {
+        if (entry.getValue() = ALWAYS_REVIEW) {
           CommentInput ci = new CommentInput();
           ci.line = 0;
           ci.unresolved = true;
@@ -301,9 +409,11 @@ public class CopyrightReviewApi {
           PartyType pt = partyType(entry.getValue());
           newComments = reviewComments(project, pt, tpAllowed, entry.getValue());
           List<CommentInfo> prior = priorComments.get(entry.getKey());
-          newComments = ImmutableList.copyOf(
-              newComments.stream().filter(ci -> !containsComment(prior, ci))
-                  .toArray(i -> new CommentInput[i]));
+          newComments =
+              ImmutableList.copyOf(
+                  newComments.stream()
+                      .filter(ci -> !containsComment(prior, ci))
+                      .toArray(i -> new CommentInput[i]));
           if (newComments.isEmpty()) {
             continue;
           }
@@ -328,18 +438,134 @@ public class CopyrightReviewApi {
   /**
    * Returns the {@link com.google.gerrit.server.CurrentUser} seeming to send the review comments.
    *
-   * Impersonates {@code fromAccountId} if configured by {@code fromAccountId =} in plugin
+   * <p>Impersonates {@code fromAccountId} if configured by {@code fromAccountId =} in plugin
    * configuration -- falling back to the identity of the user pushing the revision.
    */
   CurrentUser getSendingUser(int fromAccountId) {
-      PluginUser pluginUser = pluginUserProvider.get();
-      return fromAccountId <= 0 ? userProvider.get() :
-          identifiedUserFactory.runAs(null, new Account.Id(fromAccountId), pluginUser);
+    PluginUser pluginUser = pluginUserProvider.get();
+    return fromAccountId <= 0
+        ? userProvider.get()
+        : identifiedUserFactory.runAs(null, new Account.Id(fromAccountId), pluginUser);
   }
 
   /**
-   * Constructs a {@link com.google.gerrit.server.change.ChangeResource} from the notes log for
-   * the change onto which a new revision was pushed.
+   * Returns 1 of 3 review messages depending on the check_new_config.sh tool output.
+   *
+   * @param pluginName as installed in gerrit
+   * @param findings describes the line numbers, validity and timing run durations found
+   */
+  private String getCommitMessageMessage(
+      String pluginName, ImmutableList<CommitMessageFinding> findings) {
+    StringBuilder sb = new StringBuilder();
+    if (findings.isEmpty()) {
+      sb.append(pluginName);
+      sb.append(" plugin: match patterns have changed; please run check_new_config tool");
+    } else if (findings.size() == 1 && findings.get(0).isValid()) {
+      sb.append("check_new_config: problem pattern detected");
+    } else {
+      sb.append("check_new_config: results for wrong commit; please run again for current");
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Returns one or more of 3 review comment versions based on the check_new_config.sh tool output.
+   *
+   * @param pluginName as installed in gerrit
+   * @param findings describes the line numbers, validity and timing run durations found
+   * @param maxElapsedSeconds the largest allows timing run duration in seconds
+   */
+  private ImmutableList<CommentInput> getCommitMessageComments(
+      String pluginName, ImmutableList<CommitMessageFinding> findings, long maxElapsedSeconds) {
+    ImmutableList.Builder<CommentInput> comments = ImmutableList.builder();
+    StringBuilder sb = new StringBuilder();
+    CommentInput ci = new CommentInput();
+    if (findings.isEmpty()) {
+      sb.append("While most patterns are fine, some patterns can force your gerrit server\n");
+      sb.append("to work too hard. To protect your server, there is a tool that can\n");
+      sb.append("detect these patterns before the configuration gets submitted.\n\n");
+      sb.append("Please use git to download the tool from:\n");
+      sb.append("https://gerrit.googlesource.com/plugins/copyright/+/refs/heads/master\n\n");
+      sb.append("After downloading, run tools/check_new_config.sh (requires bazel):\n");
+      sb.append("<path>/tools/check_new_config.sh '");
+      sb.append(pluginName);
+      sb.append("' '<path>/project.config'\n");
+      sb.append("and copy it's output to your commit message.\n\n");
+      sb.append("e.g. if your local All-Projects is at workspace/All-Projects and if you\n");
+      sb.append("downloaded plugins/copyright to workspace/copyright, you might run:\n");
+      sb.append("../copyright/tools/check_new_config.sh '");
+      sb.append(pluginName);
+      sb.append("' project.config\n");
+      sb.append("from the workspace/All-Projects directory.\n");
+      ci.line = 0;
+      ci.unresolved = true;
+      ci.message = sb.toString();
+      comments.add(ci);
+    } else if (findings.size() == 1 && findings.get(0).isValid()) {
+      CommitMessageFinding finding = findings.get(0);
+      sb.append("Scanning the test file took longer than ");
+      sb.append(Long.toString(maxElapsedSeconds));
+      sb.append(" seconds.");
+      if (finding.elapsedMicros - (maxElapsedSeconds * 1000000) > 1000000) {
+        sb.append(" (");
+        sb.append(Long.toString(finding.elapsedMicros / 1000000));
+        sb.append(" seconds)");
+      }
+      sb.append("\n\nThis is much longer than usual even on a slower modern computer.\n\n");
+      sb.append("The result suggests a pattern that causes excessive backtracking.\n");
+      sb.append("Typical causes are:\n");
+      sb.append("  1. unbounded repetitions of wildcards or\n");
+      sb.append("  2. zero-length look-ahead/look-behind patterns\n\n");
+      sb.append("Wildcards:\n");
+      sb.append("  The scanner automatically handles .* and .+ patterns, but it's");
+      sb.append("  possible to accidentally compose equivalents or near-equivalents:");
+      sb.append("  e.g. (?:[a][^a])* or [\\p{N}\\p{L}\\p{P}]+ match nearly everything\n");
+      sb.append("  If your new pattern contains something similar, consider using .* for\n");
+      sb.append("  automatic handling instead, or use match a smaller character class.\n\n");
+      sb.append("Unbounded repetitions:\n");
+      sb.append("  If your new pattern uses * or + for unlimited repetitions, consider\n");
+      sb.append("  using a more limited repetition like {0,10} or {1,50} that is long\n");
+      sb.append("  enough to match what you need but short enough to scan quickly.\n\n");
+      sb.append("Zero-length look-ahead or look-behind:\n");
+      sb.append("  Patterns like (?!word), (?=word), (?<!word). (?<=word) etc. can cause\n");
+      sb.append("  excessive backtracking too. Sometimes, it is faster to match a little\n");
+      sb.append("  more than needed and use an excludePattern to eliminate unwanted hits.\n");
+      sb.append("  e.g. forbiddenPattern = owner some pattern \\p{L}*\n");
+      sb.append("       excludePattern = some pattern word\n\n");
+      sb.append("Please fix any problematic patterns and try again.\n");
+      ci.line = finding.endLine;
+      ci.range = new CommentInput.Range();
+      ci.range.startLine = finding.startLine;
+      ci.range.endLine = finding.endLine;
+      ci.range.startCharacter = finding.startCol;
+      ci.range.endCharacter = finding.endCol;
+      ci.unresolved = true;
+      ci.message = sb.toString();
+      comments.add(ci);
+    } else {
+      for (CommitMessageFinding finding : findings) {
+        sb.setLength(0);
+        sb.append("'");
+        sb.append(finding.text.trim());
+        sb.append("'\nis not a result for the patterns in the current revision");
+        ci.line = finding.endLine;
+        ci.range = new CommentInput.Range();
+        ci.range.startLine = finding.startLine;
+        ci.range.endLine = finding.endLine;
+        ci.range.startCharacter = finding.startCol;
+        ci.range.endCharacter = finding.endCol;
+        ci.unresolved = true;
+        ci.message = sb.toString();
+        comments.add(ci);
+        ci = new CommentInput();
+      }
+    }
+    return comments.build();
+  }
+
+  /**
+   * Constructs a {@link com.google.gerrit.server.change.ChangeResource} from the notes log for the
+   * change onto which a new revision was pushed.
    *
    * @param event describes the newly pushed revision
    * @param fromAccountId identifies the configured user to impersonate when sending review comments
@@ -355,7 +581,8 @@ public class CopyrightReviewApi {
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
       throw e instanceof RestApiException
-          ? (RestApiException) e : new RestApiException("Cannot load change", e);
+          ? (RestApiException) e
+          : new RestApiException("Cannot load change", e);
     }
   }
 
@@ -383,7 +610,8 @@ public class CopyrightReviewApi {
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
       throw e instanceof RestApiException
-          ? (RestApiException) e : new RestApiException("Cannot list comments", e);
+          ? (RestApiException) e
+          : new RestApiException("Cannot list comments", e);
     }
   }
 
@@ -403,7 +631,8 @@ public class CopyrightReviewApi {
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
       throw e instanceof RestApiException
-          ? (RestApiException) e : new RestApiException("Cannot post review", e);
+          ? (RestApiException) e
+          : new RestApiException("Cannot post review", e);
     }
   }
 
@@ -427,13 +656,13 @@ public class CopyrightReviewApi {
    * Puts the pieces together from a scanner finding to construct a coherent human-reable message.
    *
    * @param project describes the project or repository where the revision was pushed
-   * @param overallPt identifies the calculated
-   *     {@link com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for all of
-   *     the findings in the file. e.g. 1p license + 3p owner == 1p, no license + 3p owner == 3p
+   * @param overallPt identifies the calculated {@link
+   *     com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for all of the
+   *     findings in the file. e.g. 1p license + 3p owner == 1p, no license + 3p owner == 3p
    * @param pt identifies the {@code PartyType} of the current finding
-   * @param mt identifies the
-   *     {@link com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.MatchType} of the
-   *     current finding. i.e. AUTHOR_OWNER or LICENSE
+   * @param mt identifies the {@link
+   *     com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.MatchType} of the current
+   *     finding. i.e. AUTHOR_OWNER or LICENSE
    * @param tpAllowed is true if {@code project} allows third-party code
    * @param text of the message for the finding
    */
@@ -476,9 +705,9 @@ public class CopyrightReviewApi {
    * Converts the scanner findings in {@code matches} into human-readable review comments.
    *
    * @param project the project or repository to which the revision was pushed
-   * @param pt the calculated overall
-   *     {@link com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for the
-   *     findings e.g. 1p license + 3p owner = 1p, no license + 3p owner = 3p
+   * @param pt the calculated overall {@link
+   *     com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for the findings
+   *     e.g. 1p license + 3p owner = 1p, no license + 3p owner = 3p
    * @param tpAllowed is true if {@code project} allows third-party code
    * @param matches describes the location and types of matches found in a file
    * @return a list of {@link com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput} to
@@ -503,9 +732,10 @@ public class CopyrightReviewApi {
           builder.add(ci);
         }
         ci = new CommentInput();
-        boolean allowed = m.partyType == FIRST_PARTY
-            || (m.partyType == THIRD_PARTY && tpAllowed)
-            || (m.partyType == THIRD_PARTY && m.matchType == AUTHOR_OWNER && pt == FIRST_PARTY);
+        boolean allowed =
+            m.partyType == FIRST_PARTY
+                || (m.partyType == THIRD_PARTY && tpAllowed)
+                || (m.partyType == THIRD_PARTY && m.matchType == AUTHOR_OWNER && pt == FIRST_PARTY);
         ci.unresolved = !allowed;
         ci.range = new Comment.Range();
         ci.line = m.endLine;
@@ -541,9 +771,9 @@ public class CopyrightReviewApi {
   }
 
   /**
-   * Calculates and returns the overall
-   * {@link com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for the
-   * copyright scanner findings in {@code matches}.
+   * Calculates and returns the overall {@link
+   * com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType} for the copyright
+   * scanner findings in {@code matches}.
    */
   @VisibleForTesting
   PartyType partyType(Iterable<Match> matches) {
@@ -563,5 +793,84 @@ public class CopyrightReviewApi {
       return PartyType.THIRD_PARTY;
     }
     return pt;
+  }
+
+  /**
+   * Found {@code main} output in the commit message.
+   *
+   * <p>Each finding identifies the position in the commit message, the validity for the current
+   * scanner pattern, and the large file scan duration if valid.
+   */
+  public static class CommitMessageFinding {
+    private static final Pattern NL = Pattern.compile("\n", Pattern.MULTILINE | Pattern.DOTALL);
+
+    /** The character offset into the commit message where the finding starts. */
+    public final int start;
+    /** The character offset into the commit message where the finding ends. */
+    public final int end;
+    /** The found text apparently matching {@code main} output. */
+    public final String text;
+    /** How long in microseconds it took to scan a large file, or -1 if scan with other pattern. */
+    public final long elapsedMicros;
+
+    /** The line number of the start of the finding in the commit message. */
+    public final int startLine;
+    /** The column (0-based) of the start of the finding in the commit message. */
+    public final int startCol;
+    /** The line number of the end of the finding in the commit message. */
+    public final int endLine;
+    /** The column (0-based) of the end of the finding in the commit message. */
+    public final int endCol;
+
+    /** Returns true when {@code elapsedMicros} reflects the current scanner pattern. */
+    public boolean isValid() {
+      return elapsedMicros >= 0;
+    }
+
+    /** A finding for the current scanner pattern with relevant {@code elapsedMicros}. */
+    CommitMessageFinding(String commitMsg, String text, String elapsedMicros, int start, int end) {
+      this.start = start;
+      this.end = end;
+      this.text = text;
+      this.elapsedMicros = Long.parseLong(elapsedMicros, 16);
+
+      Matcher m = NL.matcher(commitMsg);
+      int line = 1;
+      int lineStart = 0;
+      int startLine = 0;
+      int startCol = -1;
+      int endLine = 0;
+      int endCol = -1;
+      while (m.find()) {
+        if (m.start() > start) {
+          startLine = line;
+          startCol = start - lineStart;
+        }
+        if (m.start() > end) {
+          endLine = line;
+          endCol = end - lineStart;
+          break;
+        }
+        line++;
+        lineStart = m.end();
+      }
+      if (startLine == 0) {
+        startLine = line;
+        startCol = start - lineStart;
+      }
+      if (endLine == 0) {
+        endLine = line;
+        endCol = end - lineStart;
+      }
+      this.startLine = startLine;
+      this.startCol = startCol;
+      this.endLine = endLine;
+      this.endCol = endCol;
+    }
+
+    /** A finding for a different scanner pattern -- {@code elapsedMicros} not relevant. */
+    CommitMessageFinding(String commitMsg, String text, int start, int end) {
+      this(commitMsg, text, "-1", start, end);
+    }
   }
 }
