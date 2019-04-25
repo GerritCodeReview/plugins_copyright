@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aff5d5ed_115b3249",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-04-25T00:53:28Z",
+      "side": 1,
+      "message": "Needs javadoc",
+      "revId": "975da4b6558364bb09d824272a0751ed43c8fa64",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b056c892_76753fe4",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-04-25T00:53:28Z",
+      "side": 1,
+      "message": "Edit dropped from last review.",
+      "revId": "975da4b6558364bb09d824272a0751ed43c8fa64",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
