@@ -14,11 +14,15 @@
 
 package com.googlesource.gerrit.plugins.copyright.lib;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
 import java.util.NoSuchElementException;
+import org.apache.commons.lang.StringUtils;
 
 /** Constants declaring match patterns for common copyright licenses and owners. */
 public abstract class CopyrightPatterns {
@@ -375,6 +379,25 @@ public abstract class CopyrightPatterns {
       return new Builder();
     }
 
+    public String signature() {
+      StringBuilder sb = new StringBuilder();
+      sb.append("1pl:\n");
+      sb.append(Joiner.on("\n").join(firstPartyLicenses));
+      sb.append("\n1po:\n");
+      sb.append(Joiner.on("\n").join(firstPartyOwners));
+      sb.append("\n3pl:\n");
+      sb.append(Joiner.on("\n").join(thirdPartyLicenses));
+      sb.append("\n3po:\n");
+      sb.append(Joiner.on("\n").join(thirdPartyOwners));
+      sb.append("\n!!l:\n");
+      sb.append(Joiner.on("\n").join(forbiddenLicenses));
+      sb.append("\n!!o:\n");
+      sb.append(Joiner.on("\n").join(forbiddenOwners));
+      sb.append("\nxx:\n");
+      sb.append(Joiner.on("\n").join(excludePatterns));
+      return Hashing.farmHashFingerprint64().hashBytes(sb.toString().getBytes(UTF_8)).toString();
+    }
+
     /** Implements the Builder pattern for CopyrightPatterns.RuleSet. */
     public static class Builder {
       private final ImmutableList.Builder<String> firstPartyLicenses =
@@ -408,7 +431,7 @@ public abstract class CopyrightPatterns {
       public Builder addFirstParty(String ruleName) {
         Rule pattern = lookup.get(ruleName);
         if (pattern == null) {
-          throw new UnknownPatternName(ruleName);
+          throw unknownPatternName(ruleName);
         }
         if (pattern.licenses != null) {
           firstPartyLicenses.addAll(pattern.licenses);
@@ -438,7 +461,7 @@ public abstract class CopyrightPatterns {
       public Builder addThirdParty(String ruleName) {
         Rule pattern = lookup.get(ruleName);
         if (pattern == null) {
-          throw new UnknownPatternName(ruleName);
+          throw unknownPatternName(ruleName);
         }
         if (pattern.licenses != null) {
           thirdPartyLicenses.addAll(pattern.licenses);
@@ -468,7 +491,7 @@ public abstract class CopyrightPatterns {
       public Builder addForbidden(String ruleName) {
         Rule pattern = lookup.get(ruleName);
         if (pattern == null) {
-          throw new UnknownPatternName(ruleName);
+          throw unknownPatternName(ruleName);
         }
         if (pattern.licenses != null) {
           forbiddenLicenses.addAll(pattern.licenses);
@@ -498,7 +521,7 @@ public abstract class CopyrightPatterns {
       public Builder exclude(String ruleName) {
         Rule pattern = lookup.get(ruleName);
         if (pattern == null) {
-          throw new UnknownPatternName(ruleName);
+          throw unknownPatternName(ruleName);
         }
         if (pattern.licenses != null) {
           excludePatterns.addAll(pattern.licenses);
@@ -534,6 +557,38 @@ public abstract class CopyrightPatterns {
       this.thirdPartyOwners = thirdPartyOwners;
       this.forbiddenOwners = forbiddenOwners;
       this.excludePatterns = excludePatterns;
+    }
+
+    private static UnknownPatternName unknownPatternName(String ruleName) {
+      int minDist = -1;
+      for (String key : lookup.keySet()) {
+        int dist = StringUtils.getLevenshteinDistance(key, ruleName);
+        if (minDist < 0 || dist < minDist) {
+          minDist = dist;
+        }
+      }
+      ImmutableList.Builder<String> closeMatches = ImmutableList.builder();
+      int numClose = 0;
+      if (minDist < 3) {
+        for (String key : lookup.keySet()) {
+          int dist = StringUtils.getLevenshteinDistance(key, ruleName);
+          if (dist == minDist) {
+            closeMatches.add(key);
+            numClose++;
+          }
+        }
+      }
+      String matches = Joiner.on(", ").join(numClose > 0 ? closeMatches.build() : lookup.keySet());
+      int lastIndex = matches.lastIndexOf(", ");
+      if (lastIndex > 0) {
+        matches = matches.substring(0, lastIndex + 2) + "or " + matches.substring(lastIndex + 2);
+      }
+      String message = "Unknown license or copyright owner name: " + ruleName + "\n\n" + (
+          numClose > 0
+              ? "Did you mean " + matches + "?"
+              : "Known names are: " + matches + ".");
+
+      return new UnknownPatternName(message);
     }
   }
 
@@ -584,12 +639,8 @@ public abstract class CopyrightPatterns {
 
   /** Thrown when requesting a pattern by a name that does not appear among the known patterns. */
   public static class UnknownPatternName extends NoSuchElementException {
-    UnknownPatternName(String ruleName) {
-      super(
-          "Unknown pattern name: "
-              + ruleName
-              + "\nKnown pattern names include: "
-              + Joiner.on(", ").join(lookup.keySet()));
+    UnknownPatternName(String message) {
+      super(message);
     }
   }
 }
