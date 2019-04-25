@@ -30,7 +30,30 @@ java_binary(
     deps = [":copyright_scanner"],
 )
 
-TEST_SRCS = "src/test/java/**/*Test.java"
+java_binary(
+    name = "check_new_config",
+    srcs = ["src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java"],
+    main_class = "com.googlesource.gerrit.plugins.copyright.CheckConfig",
+    deps = [":copyright_scanner"] + PLUGIN_DEPS,
+)
+
+gerrit_plugin(
+    name = "copyright",
+    srcs = glob(["src/main/java/**/*.java"]),
+    manifest_entries = [
+        "Gerrit-PluginName: copyright",
+        "Gerrit-ReloadMode: restart",
+        "Gerrit-ApiVersion: 3.0-SNAPSHOT",
+        "Gerrit-ApiType: plugin",
+        "Gerrit-Module: com.googlesource.gerrit.plugins.copyright.Module",
+    ],
+    resources = glob(["src/main/resources/**/*"]),
+)
+
+TEST_SRCS = [
+    "src/test/java/**/*IT.java",
+    "src/test/java/**/*Test.java",
+]
 
 TEST_DEPS = PLUGIN_DEPS + PLUGIN_TEST_DEPS + [
     ":copyright_scanner",
@@ -39,12 +62,22 @@ TEST_DEPS = PLUGIN_DEPS + PLUGIN_TEST_DEPS + [
     "@mockito//jar",
 ]
 
+java_library(
+    name = "testutils",
+    testonly = 1,
+    srcs = glob(
+        ["src/test/java/**/*.java"],
+        exclude = TEST_SRCS,
+    ),
+    deps = TEST_DEPS,
+)
+
 junit_tests(
     name = "copyright_scanner_tests",
     testonly = 1,
-    srcs = glob([TEST_SRCS]),
+    srcs = glob(TEST_SRCS),
     tags = ["copyright"],
-    deps = TEST_DEPS,
+    deps = [":testutils"] + TEST_DEPS,
 )
 
 sh_test(
