@@ -99,3 +99,10 @@ sh_test(
         ":testdata",
     ],
 )
+
+java_library(
+    name = "copyright_classpath_deps",
+    testonly = 1,
+    visibility = ["//visibility:public"],
+    exports = TEST_DEPS,
+)
