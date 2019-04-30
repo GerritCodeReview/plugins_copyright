@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "983f3c21_7df3fe50",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-04-30T05:35:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2aace8ae_1a449b59",
+      "revId": "7e1ef8c1bf59f1a36eccd63d5c5f5e635a776911",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6cb8236f_c22d47bf",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfigIT.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7ecdacf0_d0a1d746",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfigIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-04-30T05:35:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6cb8236f_c22d47bf",
+      "revId": "7e1ef8c1bf59f1a36eccd63d5c5f5e635a776911",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79c86974_30381463",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/TestConfig.java",
         "patchSetId": 1
@@ -50,6 +86,24 @@
       "revId": "7e1ef8c1bf59f1a36eccd63d5c5f5e635a776911",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e57e1d8c_90ee31ff",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/TestConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-04-30T05:35:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "79c86974_30381463",
+      "revId": "7e1ef8c1bf59f1a36eccd63d5c5f5e635a776911",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
