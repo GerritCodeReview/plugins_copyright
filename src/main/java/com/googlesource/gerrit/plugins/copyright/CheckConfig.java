@@ -368,7 +368,7 @@ public class CheckConfig {
 
     sb.setLength(0);
     for (int i = 255; i >= 0; i--) {
-      sb.append(String.format("%2x%2x", 255-i, i));
+      sb.append(String.format("%2x%2x", 255 - i, i));
     }
     sb.append('\n');
     String alnum1k = sb.toString();
@@ -382,7 +382,7 @@ public class CheckConfig {
     sb.append('\n');
     String alpha1k = sb.toString();
 
-    for (int i = 0; i < 16; i++) {  // 16k + 48k = 64k
+    for (int i = 0; i < 16; i++) { // 16k + 48k = 64k
       sb.append(space1k);
     }
     for (int i = 0; i < 48; i++) {
@@ -507,16 +507,13 @@ public class CheckConfig {
               elapsedMicros / 1000000);
           System.err.println(
               "might cause problems on your server. Please compare wtih the current");
-          System.err.println(
-              "configuration, and if this configuration is significantly slower,");
+          System.err.println("configuration, and if this configuration is significantly slower,");
           System.err.println("consider changing whatever pattern might cause the problem.");
         } else { // between 1s and 2s might be needed but could at least try to do better
           System.err.printf(
               "\nAt %dms, the scan took just longer than 1 second. This\n", elapsedMicros / 1000);
-          System.err.println(
-              "configuration might work okay, but takes longer than ideal. Please");
-          System.err.println(
-              "investigate whether an added pattern is more costly than needed.");
+          System.err.println("configuration might work okay, but takes longer than ideal. Please");
+          System.err.println("investigate whether an added pattern is more costly than needed.");
         }
       } else if (elapsedMicros > 1000) {
         System.err.printf("\nScanned the test load in %dms.\n", elapsedMicros / 1000);

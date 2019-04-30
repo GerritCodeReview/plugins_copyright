@@ -196,9 +196,7 @@ public class CopyrightReviewApi {
         oldConfig == null
             || oldConfig.scanner == null
             || !oldConfig.scanner.equals(newConfig.scanner));
-    Preconditions.checkArgument(
-        findings.size() != 1
-            || !findings.get(0).isValid());
+    Preconditions.checkArgument(findings.size() != 1 || !findings.get(0).isValid());
     Preconditions.checkArgument(maxElapsedSeconds > 0);
 
     long startNanos = System.nanoTime();
@@ -267,8 +265,8 @@ public class CopyrightReviewApi {
       String pluginName, ImmutableList<CommitMessageFinding> findings, long maxElapsedSeconds) {
     Preconditions.checkArgument(
         findings.size() != 1
-        || !findings.get(0).isValid()
-        || findings.get(0).elapsedMicros > maxElapsedSeconds * 1000000);
+            || !findings.get(0).isValid()
+            || findings.get(0).elapsedMicros > maxElapsedSeconds * 1000000);
     StringBuilder sb = new StringBuilder();
     sb.append(getCommitMessageMessage(pluginName, findings, maxElapsedSeconds));
     sb.append("\n\n");
