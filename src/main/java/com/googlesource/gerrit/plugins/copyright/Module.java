@@ -21,6 +21,7 @@ public class Module extends AbstractModule {
   @Override
   protected void configure() {
     install(CopyrightConfig.module());
+    install(CopyrightValidator.module());
   }
 
   @Provides

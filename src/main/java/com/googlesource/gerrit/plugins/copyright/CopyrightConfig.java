@@ -333,6 +333,7 @@ class CopyrightConfig
     } finally {
       if (trialConfig != null
           && trialConfig.scannerConfig != null
+          && !trialConfig.scannerConfig.messages.isEmpty()
           && !trialConfig.scannerConfig.hasErrors()) {
         try {
           ReviewResult result =
