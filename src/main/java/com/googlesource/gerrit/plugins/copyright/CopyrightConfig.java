@@ -172,6 +172,11 @@ class CopyrightConfig
     return checkConfig.scannerConfig;
   }
 
+  @VisibleForTesting
+  void setProjectConfig(String pluginName, String projectConfigContents) throws Exception {
+    checkConfig = new CheckConfig(pluginName, projectConfigContents);
+  }
+
   /** Listens for merges to /refs/meta/config on All-Projects to reload plugin configuration. */
   @Override
   public void onGitReferenceUpdated(GitReferenceUpdatedListener.Event event) {
@@ -333,6 +338,7 @@ class CopyrightConfig
     } finally {
       if (trialConfig != null
           && trialConfig.scannerConfig != null
+          && !trialConfig.scannerConfig.messages.isEmpty()
           && !trialConfig.scannerConfig.hasErrors()) {
         try {
           ReviewResult result =

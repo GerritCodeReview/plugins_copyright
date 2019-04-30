@@ -25,6 +25,7 @@ import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_THIRD_
 import static com.googlesource.gerrit.plugins.copyright.TestConfig.LOCAL_BRANCH;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
 import com.google.common.truth.Correspondence;
 import com.google.gerrit.acceptance.GerritConfig;
 import com.google.gerrit.acceptance.GerritConfigs;
@@ -52,6 +53,8 @@ import org.junit.Test;
 
 @TestPlugin(name = "copyright", sysModule = "com.googlesource.gerrit.plugins.copyright.Module")
 public class CopyrightConfigIT extends LightweightPluginDaemonTest {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @Test
   @GerritConfigs({
     @GerritConfig(name = "plugin.copyright.enable", value = "true"),

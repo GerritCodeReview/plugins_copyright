@@ -15,6 +15,7 @@
 package com.googlesource.gerrit.plugins.copyright;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_ALWAYS_REVIEW_PATH;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_ENABLE;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_EXCLUDE;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FIRST_PARTY;
@@ -22,6 +23,7 @@ import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FORBID
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FORBIDDEN_PATTERN;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_REVIEW_LABEL;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_THIRD_PARTY;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_THIRD_PARTY_ALLOWED_PROJECTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.collect.ImmutableList;
@@ -82,6 +84,9 @@ class TestConfig {
 
   static final Consumer<PluginConfig> BASE_CONFIG =
       pCfg -> {
+        pCfg.setStringList(KEY_ALWAYS_REVIEW_PATH, ImmutableList.of("PATENT$"));
+        pCfg.setStringList(
+            KEY_THIRD_PARTY_ALLOWED_PROJECTS, ImmutableList.of("ThirdParty(?:Owner)?Allowed"));
         pCfg.setString(KEY_REVIEW_LABEL, "Copyright-Review");
         pCfg.setStringList(KEY_EXCLUDE, ImmutableList.of("EXAMPLES"));
         pCfg.setStringList(
@@ -168,6 +173,15 @@ class TestConfig {
                 GroupList.FILE_NAME,
                 groupList.asText()));
     return pushCommit.to("refs/for/" + RefNames.REFS_CONFIG);
+  }
+
+  /**
+   * Applies {@link com.google.gerrit.server.config.PluginConfig} to project config and returns the
+   * contents of the project config.
+   */
+  String getProjectConfigContents() throws Exception {
+    savePlugin();
+    return configProject.toText();
   }
 
   /** Adds {@code message} to the /COMMIT_MSG text for the push. */
