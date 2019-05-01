@@ -281,17 +281,19 @@ public class CopyrightValidator implements RevisionCreatedListener {
     metrics.scanRevisionTimerByBranch.record(branch, scanTime, TimeUnit.MILLISECONDS);
 
     ReviewResult result = reviewApi.reportScanFindings(project, scannerConfig, event, findings);
-    if (result.error != null && !result.error.equals("")) {
+    if (result != null && result.error != null && !result.error.equals("")) {
       logger.atSevere().log(
           "%s plugin revision %s: error posting review: %s",
           pluginName, event.getChange().currentRevision, result.error);
     }
-    for (Map.Entry<String, AddReviewerResult> entry : result.reviewers.entrySet()) {
-      AddReviewerResult arr = entry.getValue();
-      if (arr.error != null && !arr.error.equals("")) {
-        logger.atSevere().log(
-            "%s plugin revision %s: error adding reviewer %s: %s",
-            pluginName, event.getChange().currentRevision, entry.getKey(), arr.error);
+    if (result != null && result.reviewers != null) {
+      for (Map.Entry<String, AddReviewerResult> entry : result.reviewers.entrySet()) {
+        AddReviewerResult arr = entry.getValue();
+        if (arr.error != null && !arr.error.equals("")) {
+          logger.atSevere().log(
+              "%s plugin revision %s: error adding reviewer %s: %s",
+              pluginName, event.getChange().currentRevision, entry.getKey(), arr.error);
+        }
       }
     }
   }

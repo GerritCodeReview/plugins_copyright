@@ -21,11 +21,12 @@ import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Par
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.FORBIDDEN;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.THIRD_PARTY;
 import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.PartyType.UNKNOWN;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Correspondence;
@@ -42,15 +43,15 @@ import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Match;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class CopyrightReviewApiTest {
   private static final PluginUser pluginUser = new FakePluginUser();
   private static final CurrentUser currentUser = new FakeCurrentUser();
 
-  @Mock private IdentifiedUser.GenericFactory identifiedUserFactory;
+  private IdentifiedUser.GenericFactory identifiedUserFactory =
+      createMock(IdentifiedUser.GenericFactory.class);
 
   private CopyrightReviewApi reviewApi;
 
@@ -71,16 +72,24 @@ public class CopyrightReviewApiTest {
 
   @Test
   public void testGetSendingUser_fromAccountIdConfigured() throws Exception {
+    expect(
+            identifiedUserFactory.runAs(
+                eq(null), anyObject(Account.Id.class), anyObject(PluginUser.class)))
+        .andReturn(null);
+    replay(identifiedUserFactory);
+
     CurrentUser from = reviewApi.getSendingUser(808);
-    verify(identifiedUserFactory, times(1))
-        .runAs(eq(null), any(Account.Id.class), any(PluginUser.class));
+
+    verify(identifiedUserFactory);
   }
 
   @Test
   public void testGetSendingUser_noFromAccountIdConfigured() throws Exception {
+    replay(identifiedUserFactory);
+
     CurrentUser from = reviewApi.getSendingUser(0);
-    verify(identifiedUserFactory, never())
-        .runAs(eq(null), any(Account.Id.class), any(PluginUser.class));
+
+    verify(identifiedUserFactory);
     assertThat(from).isSameAs(currentUser);
   }
 

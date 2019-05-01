@@ -57,9 +57,7 @@ TEST_SRCS = [
 
 TEST_DEPS = PLUGIN_DEPS + PLUGIN_TEST_DEPS + [
     ":copyright_scanner",
-    "//lib/mockito",
     "@guava//jar",
-    "@mockito//jar",
 ]
 
 java_library(
