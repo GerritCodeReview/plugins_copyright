@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f04b0b5_ec798507",
+        "filename": "BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-01T20:56:50Z",
+      "side": 1,
+      "message": "Put this back.",
+      "revId": "5317f097a00cfca121cdeb1d8fa3ae6b43f48d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d5d3b78_4f7b202f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-01T20:56:50Z",
+      "side": 1,
+      "message": "Run google-java-format",
+      "revId": "5317f097a00cfca121cdeb1d8fa3ae6b43f48d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4935ea57_2c32ef61",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-01T20:56:50Z",
+      "side": 1,
+      "message": "Delete this.",
+      "revId": "5317f097a00cfca121cdeb1d8fa3ae6b43f48d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7842b8f6_b096bac4",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java.save",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-01T20:56:50Z",
+      "side": 1,
+      "message": "Delete this file.",
+      "revId": "5317f097a00cfca121cdeb1d8fa3ae6b43f48d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
