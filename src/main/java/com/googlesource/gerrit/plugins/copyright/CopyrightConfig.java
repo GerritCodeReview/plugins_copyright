@@ -199,9 +199,13 @@ class CopyrightConfig
   @Override
   public List<CommitValidationMessage> onCommitReceived(CommitReceivedEvent event)
       throws CommitValidationException {
-    if (!event.getBranchNameKey().get().equals(RefNames.REFS_CONFIG)) {
+    logger.atSevere().log("onCommitReceived ref=%s", event.getRefName());
+    if (!event.getRefName().equals(RefNames.REFS_CONFIG)) {
       return Collections.emptyList();
     }
+//    if (!event.getBranchNameKey().get().equals(RefNames.REFS_CONFIG)) {
+//      return Collections.emptyList();
+//    }
     if (!event.getProjectNameKey().equals(allProjectsName)) {
       return Collections.emptyList();
     }
@@ -378,7 +382,7 @@ class CopyrightConfig
     }
     ProjectState projectState;
     try {
-      projectState = projectCache.checkedGet(new Project.NameKey(project));
+      projectState = projectCache.checkedGet(Project.nameKey(project));
     } catch (IOException e) {
       logger.atSevere().withCause(e).log("error getting project state of %s", project);
       // throw IllegalStateException? RestApiException?

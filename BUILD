@@ -57,9 +57,7 @@ TEST_SRCS = [
 
 TEST_DEPS = PLUGIN_DEPS + PLUGIN_TEST_DEPS + [
     ":copyright_scanner",
-    "//lib/mockito",
     "@guava//jar",
-    "@mockito//jar",
 ]
 
 java_library(
@@ -100,9 +98,10 @@ sh_test(
     ],
 )
 
-java_library(
-    name = "copyright_classpath_deps",
-    testonly = 1,
-    visibility = ["//visibility:public"],
-    exports = TEST_DEPS,
-)
+
+#java_library(
+#    name = "copyright_classpath_deps",
+#    testonly = 1,
+#    visibility = ["//visibility:public"],
+#    exports = TEST_DEPS,
+#)

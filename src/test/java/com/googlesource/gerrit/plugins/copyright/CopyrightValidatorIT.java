@@ -16,8 +16,12 @@ package com.googlesource.gerrit.plugins.copyright;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_CC;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FIRST_PARTY;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FIRST_PARTY_PATTERN;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_FROM;
 import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_REVIEWER;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_REVIEW_LABEL;
+import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_THIRD_PARTY_PATTERN;
 import static com.googlesource.gerrit.plugins.copyright.TestConfig.LOCAL_BRANCH;
 
 import com.google.common.collect.ImmutableList;
@@ -56,8 +60,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushNoLicense() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "filename", "content")
+        pushFactory.create(author.newIdent(), testRepo, "subject", "filename", "content")
             .to("refs/for/master");
 
     assertNoReviewerAdded(result);
@@ -71,8 +74,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushAlwaysReview() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "PATENT", "content")
+        pushFactory.create(author.newIdent(), testRepo, "subject", "PATENT", "content")
             .to("refs/for/master");
 
     assertReviewerAdded(result);
@@ -88,8 +90,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyOwner() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "source.cpp", FIRST_PARTY_OWNER)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "source.cpp", FIRST_PARTY_OWNER)
             .to("refs/for/master");
 
     assertNoReviewerAdded(result);
@@ -105,8 +107,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyHeader() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "source.cpp", FIRST_PARTY_HEADER)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "source.cpp", FIRST_PARTY_HEADER)
             .to("refs/for/master");
 
     assertNoReviewerAdded(result);
@@ -122,14 +124,12 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyOwnerAndHeader() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(
-                author.newIdent(),
-                testRepo,
-                "subject",
-                "source.cpp",
-                FIRST_PARTY_OWNER + FIRST_PARTY_HEADER)
-            .to("refs/for/master");
+        pushFactory.create(
+            author.newIdent(),
+            testRepo,
+            "subject",
+            "source.cpp",
+            FIRST_PARTY_OWNER + FIRST_PARTY_HEADER).to("refs/for/master");
 
     assertNoReviewerAdded(result);
     assertThat(result.getChange().notes().getComments().values())
@@ -144,14 +144,12 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyHeaderAndOwner() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(
-                author.newIdent(),
-                testRepo,
-                "subject",
-                "source.cpp",
-                FIRST_PARTY_HEADER + FIRST_PARTY_OWNER)
-            .to("refs/for/master");
+        pushFactory.create(
+            author.newIdent(),
+            testRepo,
+            "subject",
+            "source.cpp",
+            FIRST_PARTY_HEADER + FIRST_PARTY_OWNER).to("refs/for/master");
 
     assertNoReviewerAdded(result);
     assertThat(result.getChange().notes().getComments().values())
@@ -166,8 +164,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushNotAContribHeader() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "source.cpp", NOT_A_CONTRIB_HEADER)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "source.cpp", NOT_A_CONTRIB_HEADER)
             .to("refs/for/master");
 
     assertReviewerAdded(result);
@@ -183,8 +181,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushThirdPartyAllowed() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "LICENSE", THIRD_PARTY_MIT)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "LICENSE", THIRD_PARTY_MIT)
             .to("refs/for/master");
 
     assertNoReviewerAdded(result);
@@ -200,8 +198,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushThirdPartyNotAllowed() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "LICENSE", THIRD_PARTY_MIT)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "LICENSE", THIRD_PARTY_MIT)
             .to("refs/for/master");
 
     assertReviewerAdded(result);
@@ -217,8 +215,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushThirdPartyOwnerAllowed() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "COPYING", THIRD_PARTY_OWNER)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "COPYING", THIRD_PARTY_OWNER)
             .to("refs/for/master");
 
     assertNoReviewerAdded(result);
@@ -234,8 +232,8 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushThirdPartyOwnerNotAllowed() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(author.newIdent(), testRepo, "subject", "COPYING", THIRD_PARTY_OWNER)
+        pushFactory.create(
+            author.newIdent(), testRepo, "subject", "COPYING", THIRD_PARTY_OWNER)
             .to("refs/for/master");
 
     assertReviewerAdded(result);
@@ -251,14 +249,12 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyLicenseThirdPartyOwner() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(
-                author.newIdent(),
-                testRepo,
-                "subject",
-                "COPYING",
-                FIRST_PARTY_HEADER + THIRD_PARTY_OWNER)
-            .to("refs/for/master");
+        pushFactory.create(
+            author.newIdent(),
+            testRepo,
+            "subject",
+            "COPYING",
+            FIRST_PARTY_HEADER + THIRD_PARTY_OWNER).to("refs/for/master");
 
     assertNoReviewerAdded(result);
     assertThat(result.getChange().notes().getComments().values())
@@ -275,14 +271,12 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushFirstPartyOwnerThirdPartyOwner() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(
-                author.newIdent(),
-                testRepo,
-                "subject",
-                "COPYING",
-                FIRST_PARTY_OWNER + THIRD_PARTY_OWNER)
-            .to("refs/for/master");
+        pushFactory.create(
+            author.newIdent(),
+            testRepo,
+            "subject",
+            "COPYING",
+            FIRST_PARTY_OWNER + THIRD_PARTY_OWNER).to("refs/for/master");
 
     assertReviewerAdded(result);
     assertThat(result.getChange().notes().getComments().values())
@@ -299,21 +293,21 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightValidator_pushThirdPartyLicenseFirstPartyOwner() throws Exception {
     PushOneCommit.Result result =
-        pushFactory
-            .create(
-                author.newIdent(),
-                testRepo,
-                "subject",
-                "COPYING",
-                THIRD_PARTY_MIT + FIRST_PARTY_OWNER)
-            .to("refs/for/master");
+        pushFactory.create(
+            author.newIdent(),
+            testRepo,
+            "subject",
+            "COPYING",
+            THIRD_PARTY_MIT + FIRST_PARTY_OWNER).to("refs/for/master");
 
     assertReviewerAdded(result);
     assertThat(result.getChange().notes().getComments().values())
         .comparingElementsUsing(commentContains())
         .containsExactly(
-            unresolved("Third-party license disallowed"), resolved("First-party author or owner"));
+            unresolved("Third-party license disallowed"),
+            resolved("First-party author or owner"));
   }
+
 
   private static final String FIRST_PARTY_OWNER =
       "// Copyright (C) 2019 The Android Open Source Project\n";
@@ -404,7 +398,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   }
 
   private AccountGroup.Id nextGroupId() {
-    return new AccountGroup.Id(nextId++);
+    return AccountGroup.id(nextId++);
   }
 
   private TestRepository<InMemoryRepository> getTestRepo(Project.NameKey projectName)
@@ -416,7 +410,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   }
 
   private InternalGroup testGroup(String name) throws Exception {
-    AccountGroup.NameKey nameKey = new AccountGroup.NameKey(name);
+    AccountGroup.NameKey nameKey = AccountGroup.nameKey(name);
     Optional<InternalGroup> g = groupCache.get(nameKey);
     if (g.isPresent()) {
       return g.get();
@@ -424,7 +418,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
     GroupsUpdate groupsUpdate = groupsUpdateProvider.get();
     InternalGroupCreation gc =
         InternalGroupCreation.builder()
-            .setGroupUUID(new AccountGroup.UUID("users-" + name.replace(" ", "_")))
+            .setGroupUUID(AccountGroup.uuid("users-" + name.replace(" ", "_")))
             .setNameKey(nameKey)
             .setId(nextGroupId())
             .build();
