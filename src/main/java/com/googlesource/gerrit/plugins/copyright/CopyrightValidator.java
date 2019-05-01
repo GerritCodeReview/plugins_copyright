@@ -233,7 +233,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
     metrics.scanCountByProject.increment(project);
     metrics.scanCountByBranch.increment(branch);
 
-    try (Repository repo = repoManager.openRepository(new Project.NameKey(project));
+    try (Repository repo = repoManager.openRepository(Project.nameKey(project));
         RevWalk revWalk = new RevWalk(repo);
         TreeWalk tw = new TreeWalk(revWalk.getObjectReader())) {
       RevCommit commit = repo.parseCommit(ObjectId.fromString(event.getRevision().commit.commit));

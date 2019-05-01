@@ -354,7 +354,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
   }
 
   private AccountGroup.Id nextGroupId() {
-    return new AccountGroup.Id(nextId++);
+    return AccountGroup.id(nextId++);
   }
 
   private TestRepository<InMemoryRepository> getTestRepo(Project.NameKey projectName)
@@ -366,7 +366,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
   }
 
   private InternalGroup testGroup(String name) throws Exception {
-    AccountGroup.NameKey nameKey = new AccountGroup.NameKey(name);
+    AccountGroup.NameKey nameKey = AccountGroup.nameKey(name);
     Optional<InternalGroup> g = groupCache.get(nameKey);
     if (g.isPresent()) {
       return g.get();
@@ -374,7 +374,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
     GroupsUpdate groupsUpdate = groupsUpdateProvider.get();
     InternalGroupCreation gc =
         InternalGroupCreation.builder()
-            .setGroupUUID(new AccountGroup.UUID("users-" + name.replace(" ", "_")))
+            .setGroupUUID(AccountGroup.uuid("users-" + name.replace(" ", "_")))
             .setNameKey(nameKey)
             .setId(nextGroupId())
             .build();

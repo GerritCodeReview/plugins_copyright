@@ -468,7 +468,7 @@ public class CopyrightReviewApi {
     PluginUser pluginUser = pluginUserProvider.get();
     return fromAccountId <= 0
         ? userProvider.get()
-        : identifiedUserFactory.runAs(null, new Account.Id(fromAccountId), pluginUser);
+        : identifiedUserFactory.runAs(null, Account.id(fromAccountId), pluginUser);
   }
 
   /**
@@ -643,8 +643,7 @@ public class CopyrightReviewApi {
       throws RestApiException {
     try {
       CurrentUser fromUser = getSendingUser(fromAccountId);
-      ChangeNotes notes =
-          changeNotesFactory.createChecked(new Change.Id(event.getChange()._number));
+      ChangeNotes notes = changeNotesFactory.createChecked(Change.id(event.getChange()._number));
       return changeResourceFactory.create(notes, fromUser);
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);

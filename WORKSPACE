@@ -1,7 +1,7 @@
 workspace(name = "copyright")
 load("//:bazlets.bzl", "load_bazlets")
 load_bazlets(
-    commit = "f3b3eecf061193e8909298bc9c35027df3bf9d44",
+    commit = "8808e401a9c68a02ae541c36a36dd672a171b7e7"
     #local_path = "/home/<user>/projects/bazlets",
 )
 
