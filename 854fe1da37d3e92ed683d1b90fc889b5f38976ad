@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11b33fe4_7b1e71f1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1024147
+      },
+      "writtenOn": "2019-05-15T07:24:39Z",
+      "side": 1,
+      "message": "this gets prepended automatically. Can you remove these prefixes?",
+      "range": {
+        "startLine": 102,
+        "startChar": 15,
+        "endLine": 102,
+        "endChar": 32
+      },
+      "revId": "854fe1da37d3e92ed683d1b90fc889b5f38976ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
