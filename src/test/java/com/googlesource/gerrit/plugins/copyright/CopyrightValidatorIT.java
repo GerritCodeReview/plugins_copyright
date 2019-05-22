@@ -379,11 +379,11 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
     TestConfig testConfig = new TestConfig(allProjects, plugin.getName(), admin, testRepo);
     testConfig.copyLabel("Code-Review", "Copyright-Review");
     testConfig.setVoters(
-        RefNames.REFS_HEADS + "*",
+        RefNames.REFS + "*",
         "Copyright-Review",
         new TestConfig.Voter("Administrators", -2, +2),
         new TestConfig.Voter(expertGroup.getNameKey().get(), -2, +2),
-        new TestConfig.Voter("Registered Users", -2, 0));
+        new TestConfig.Voter("Registered Users", -2, 2));
     testConfig.addGroups(botGroup, expertGroup);
     testConfig.updatePlugin(
         TestConfig.BASE_CONFIG,
@@ -433,18 +433,18 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   }
 
   private void assertReviewerAdded(PushOneCommit.Result result) throws Exception {
-    result.assertOkStatus();
-    result.assertChange(
-        Change.Status.NEW,
-        null,
-        ImmutableList.of(author, reviewer),
-        ImmutableList.of(pluginAccount, observer));
+   result.assertOkStatus();
+   result.assertChange(
+       Change.Status.NEW,
+       null,
+       ImmutableList.of(author, reviewer, pluginAccount),
+       ImmutableList.of(observer));
   }
 
   private void assertNoReviewerAdded(PushOneCommit.Result result) throws Exception {
-    result.assertOkStatus();
-    result.assertChange(
-        Change.Status.NEW, null, ImmutableList.of(author), ImmutableList.of(pluginAccount));
+   result.assertOkStatus();
+   result.assertChange(
+       Change.Status.NEW, null, ImmutableList.of(author, pluginAccount), ImmutableList.of());
   }
 
   private CommentMatch resolved(String content) {
