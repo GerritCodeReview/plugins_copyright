@@ -33,18 +33,13 @@ import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.extensions.api.GerritApi;
+import com.google.gerrit.extensions.common.GroupInfo;
 import com.google.gerrit.reviewdb.client.AccountGroup;
 import com.google.gerrit.reviewdb.client.Comment;
 import com.google.gerrit.reviewdb.client.Project;
 import com.google.gerrit.reviewdb.client.RefNames;
-import com.google.gerrit.server.ServerInitiated;
-import com.google.gerrit.server.group.InternalGroup;
-import com.google.gerrit.server.group.db.GroupsUpdate;
-import com.google.gerrit.server.group.db.InternalGroupCreation;
-import com.google.gerrit.server.group.db.InternalGroupUpdate;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import java.util.Optional;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.junit.Before;
@@ -104,8 +99,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightConfig_pushWithSenderNoName() throws Exception {
     TestAccount anonymous =
-        accountCreator.create(
-            "copyright-scan", "", "", "Non-Interactive Users", expertGroup.getName());
+        accountCreator.create("copyright-scan", "", "", "Non-Interactive Users", expertGroup.name);
     testConfig.updatePlugin(
         cfg -> {
           cfg.setInt(KEY_FROM, anonymous.id().get());
@@ -305,29 +299,29 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
 
   private static int nextId = 123;
 
-  @Inject @ServerInitiated private Provider<GroupsUpdate> groupsUpdateProvider;
-
   private TestAccount sender;
   private TestAccount reviewer;
   private TestAccount observer;
-  private InternalGroup botGroup;
-  private InternalGroup expertGroup;
+  private GroupInfo botGroup;
+  private GroupInfo expertGroup;
   private TestConfig testConfig;
+
+  @Inject GerritApi gApi;
 
   @Before
   public void setUp() throws Exception {
-    botGroup = testGroup("Non-Interactive Users");
-    expertGroup = testGroup("Copyright Experts");
+    botGroup = gApi.groups().id("Non-Interactive Users").detail();
+    expertGroup = gApi.groups().create("Copyright Experts").detail();
     sender =
         accountCreator.create(
             "copyright-scanner",
             "copyright-scanner@example.com",
             "Copyright Scanner",
             "Non-Interactive Users",
-            expertGroup.getName());
+            expertGroup.name);
     reviewer =
         accountCreator.create(
-            "lawyercat", "legal@example.com", "J. Doe J.D. LL.M. Esq.", expertGroup.getName());
+            "lawyercat", "legal@example.com", "J. Doe J.D. LL.M. Esq.", expertGroup.name);
     observer = accountCreator.create("my-team", "my-team@example.com", "My Team");
     testRepo = getTestRepo(allProjects);
     testConfig = new TestConfig(allProjects, plugin.getName(), admin, testRepo);
@@ -336,7 +330,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
         RefNames.REFS_HEADS + "*",
         "Copyright-Review",
         new TestConfig.Voter("Administrators", -2, +2),
-        new TestConfig.Voter(expertGroup.getNameKey().get(), -2, +2),
+        new TestConfig.Voter(expertGroup.name, -2, +2),
         new TestConfig.Voter("Registered Users", -2, 0));
     testConfig.addGroups(botGroup, expertGroup);
     testConfig.updatePlugin(
@@ -363,23 +357,6 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
     GitUtil.fetch(testRepo, RefNames.REFS_CONFIG + ":" + LOCAL_BRANCH);
     testRepo.reset(LOCAL_BRANCH);
     return testRepo;
-  }
-
-  private InternalGroup testGroup(String name) throws Exception {
-    AccountGroup.NameKey nameKey = AccountGroup.nameKey(name);
-    Optional<InternalGroup> g = groupCache.get(nameKey);
-    if (g.isPresent()) {
-      return g.get();
-    }
-    GroupsUpdate groupsUpdate = groupsUpdateProvider.get();
-    InternalGroupCreation gc =
-        InternalGroupCreation.builder()
-            .setGroupUUID(AccountGroup.uuid("users-" + name.replace(" ", "_")))
-            .setNameKey(nameKey)
-            .setId(nextGroupId())
-            .build();
-    InternalGroupUpdate gu = InternalGroupUpdate.builder().setName(nameKey).build();
-    return groupsUpdate.createGroup(gc, gu);
   }
 
   private static Correspondence<Comment, String> warningContains() {

@@ -31,10 +31,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.common.data.GroupReference;
+import com.google.gerrit.extensions.common.GroupInfo;
+import com.google.gerrit.reviewdb.client.AccountGroup;
 import com.google.gerrit.reviewdb.client.Project;
 import com.google.gerrit.reviewdb.client.RefNames;
 import com.google.gerrit.server.config.PluginConfig;
-import com.google.gerrit.server.group.InternalGroup;
 import com.google.gerrit.server.project.GroupList;
 import com.google.gerrit.server.project.ProjectConfig;
 import java.util.Arrays;
@@ -117,13 +118,13 @@ class TestConfig {
       };
 
   /** Adds {@code groups} to the groups file. */
-  void addGroups(InternalGroup... groups) throws Exception {
+  void addGroups(GroupInfo... groups) throws Exception {
     if (groups == null) {
       return;
     }
-    for (InternalGroup group : groups) {
-      groupList.put(
-          group.getGroupUUID(), new GroupReference(group.getGroupUUID(), group.getNameKey().get()));
+    for (GroupInfo group : groups) {
+      AccountGroup.UUID uuid = AccountGroup.uuid(group.id);
+      groupList.put(uuid, new GroupReference(uuid, group.name));
     }
   }
 
