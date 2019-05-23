@@ -29,6 +29,8 @@ import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.extensions.api.GerritApi;
+import com.google.gerrit.extensions.common.GroupInfo;
 import com.google.gerrit.reviewdb.client.AccountGroup;
 import com.google.gerrit.reviewdb.client.Change;
 import com.google.gerrit.reviewdb.client.Comment;
@@ -39,6 +41,7 @@ import com.google.gerrit.server.group.InternalGroup;
 import com.google.gerrit.server.group.db.GroupsUpdate;
 import com.google.gerrit.server.group.db.InternalGroupCreation;
 import com.google.gerrit.server.group.db.InternalGroupUpdate;
+import com.google.gerrit.server.project.ProjectCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.Optional;
@@ -351,28 +354,35 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
 
   @Inject @ServerInitiated private Provider<GroupsUpdate> groupsUpdateProvider;
 
-  private InternalGroup botGroup;
-  private InternalGroup expertGroup;
+  private GroupInfo botGroup;
+  private GroupInfo expertGroup;
   private TestAccount pluginAccount;
   private TestAccount reviewer;
   private TestAccount observer;
   private TestAccount author;
   private String projectConfigContent;
 
+  @Inject
+  ProjectCache projectCache;
+
+  @Inject
+  GerritApi gApi;
+
   @Before
   public void setUp() throws Exception {
-    botGroup = testGroup("Non-Interactive Users");
-    expertGroup = testGroup("Copyright Experts");
+
+    botGroup = gApi.groups().id("Non-Interactive Users").detail();
+    expertGroup = gApi.groups().create("Copyright Experts").detail();
     pluginAccount =
         accountCreator.create(
             "copyright-scanner",
             "copyright-scanner@example.com",
             "Copyright Scanner",
             "Non-Interactive Users",
-            expertGroup.getName());
+            expertGroup.name);
     reviewer =
         accountCreator.create(
-            "lawyercat", "legal@example.com", "J. Doe J.D. LL.M. Esq.", expertGroup.getName());
+            "lawyercat", "legal@example.com", "J. Doe J.D. LL.M. Esq.", expertGroup.name);
     observer = accountCreator.create("my-team", "my-team@example.com", "My Team");
     author = accountCreator.create("author", "author@example.com", "J. Doe");
     TestRepository<InMemoryRepository> testRepo = getTestRepo(allProjects);
@@ -382,7 +392,7 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
         RefNames.REFS_HEADS + "*",
         "Copyright-Review",
         new TestConfig.Voter("Administrators", -2, +2),
-        new TestConfig.Voter(expertGroup.getNameKey().get(), -2, +2),
+        new TestConfig.Voter(expertGroup.name, -2, +2),
         new TestConfig.Voter("Registered Users", -2, 0));
     testConfig.addGroups(botGroup, expertGroup);
     testConfig.updatePlugin(
@@ -401,6 +411,11 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
     result.assertOkStatus();
     assertThat(result.getChange().publishedComments()).isEmpty();
     merge(result);
+
+
+
+    projectCache.evict(allProjects);
+    projectCache.evict(project);
   }
 
   private AccountGroup.Id nextGroupId() {
@@ -415,36 +430,35 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
     return testRepo;
   }
 
-  private InternalGroup testGroup(String name) throws Exception {
-    AccountGroup.NameKey nameKey = AccountGroup.nameKey(name);
-    Optional<InternalGroup> g = groupCache.get(nameKey);
-    if (g.isPresent()) {
-      return g.get();
-    }
-    GroupsUpdate groupsUpdate = groupsUpdateProvider.get();
-    InternalGroupCreation gc =
-        InternalGroupCreation.builder()
-            .setGroupUUID(AccountGroup.uuid("users-" + name.replace(" ", "_")))
-            .setNameKey(nameKey)
-            .setId(nextGroupId())
-            .build();
-    InternalGroupUpdate gu = InternalGroupUpdate.builder().setName(nameKey).build();
-    return groupsUpdate.createGroup(gc, gu);
-  }
+  // private InternalGroup testGroup(String name) throws Exception {
+  //   AccountGroup.NameKey nameKey = AccountGroup.nameKey(name);
+  //   Optional<InternalGroup> g = groupCache.get(nameKey);
+  //   if (g.isPresent()) {
+  //     return g.get();
+  //   }
+  //   GroupsUpdate groupsUpdate = groupsUpdateProvider.get();
+  //   InternalGroupCreation gc =
+  //       InternalGroupCreation.builder()
+  //           .setNameKey(nameKey)
+  //           .setId(nextGroupId())
+  //           .build();
+  //   InternalGroupUpdate gu = InternalGroupUpdate.builder().setName(nameKey).build();
+  //   return groupsUpdate.createGroup(gc, gu);
+  // }
 
   private void assertReviewerAdded(PushOneCommit.Result result) throws Exception {
     result.assertOkStatus();
     result.assertChange(
         Change.Status.NEW,
         null,
-        ImmutableList.of(author, reviewer),
-        ImmutableList.of(pluginAccount, observer));
+        ImmutableList.of(author, reviewer, pluginAccount),
+        ImmutableList.of(observer));
   }
 
   private void assertNoReviewerAdded(PushOneCommit.Result result) throws Exception {
     result.assertOkStatus();
     result.assertChange(
-        Change.Status.NEW, null, ImmutableList.of(author), ImmutableList.of(pluginAccount));
+        Change.Status.NEW, null, ImmutableList.of(author, pluginAccount), ImmutableList.of());
   }
 
   private CommentMatch resolved(String content) {

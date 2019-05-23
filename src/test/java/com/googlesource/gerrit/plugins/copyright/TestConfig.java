@@ -31,6 +31,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.common.data.GroupReference;
+import com.google.gerrit.extensions.common.GroupInfo;
+import com.google.gerrit.reviewdb.client.AccountGroup;
 import com.google.gerrit.reviewdb.client.Project;
 import com.google.gerrit.reviewdb.client.RefNames;
 import com.google.gerrit.server.config.PluginConfig;
@@ -38,6 +40,7 @@ import com.google.gerrit.server.group.InternalGroup;
 import com.google.gerrit.server.project.GroupList;
 import com.google.gerrit.server.project.ProjectConfig;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
@@ -117,13 +120,13 @@ class TestConfig {
       };
 
   /** Adds {@code groups} to the groups file. */
-  void addGroups(InternalGroup... groups) throws Exception {
+  void addGroups(GroupInfo... groups) throws Exception {
     if (groups == null) {
       return;
     }
-    for (InternalGroup group : groups) {
+    for (GroupInfo group : groups) {
       groupList.put(
-          group.getGroupUUID(), new GroupReference(group.getGroupUUID(), group.getNameKey().get()));
+          AccountGroup.uuid(group.id), new GroupReference(AccountGroup.uuid(group.id), group.name));
     }
   }
 
@@ -162,16 +165,18 @@ class TestConfig {
     savePlugin();
     String subject = "Change All-Projects project.config\n\n" + commitMsg;
     PersonIdent author = owner.newIdent();
+    String str = configProject.toText();
+    Map<String, String> test = ImmutableMap.<String, String>of(
+        ProjectConfig.PROJECT_CONFIG,
+        str,
+        GroupList.FILE_NAME,
+        groupList.asText());
     PushOneCommit pushCommit =
         pushFactory.create(
             author,
             testRepo,
-            subject,
-            ImmutableMap.<String, String>of(
-                ProjectConfig.PROJECT_CONFIG,
-                configProject.toText(),
-                GroupList.FILE_NAME,
-                groupList.asText()));
+            subject,test
+            );
     return pushCommit.to("refs/for/" + RefNames.REFS_CONFIG);
   }
 

@@ -338,7 +338,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
         new TestConfig.Voter("Administrators", -2, +2),
         new TestConfig.Voter(expertGroup.getNameKey().get(), -2, +2),
         new TestConfig.Voter("Registered Users", -2, 0));
-    testConfig.addGroups(botGroup, expertGroup);
+    //testConfig.addGroups(botGroup, expertGroup);
     testConfig.updatePlugin(
         TestConfig.BASE_CONFIG,
         TestConfig.ENABLE_CONFIG,
