@@ -1,4 +1,4 @@
 #!/bin/sh
 # Copyright (C) 2019
-# Jane Doe <jdoe@example.com>
+#  Jane Doe <jdoe@example.com>
 exit 0

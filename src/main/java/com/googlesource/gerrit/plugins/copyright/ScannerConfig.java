@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/** Configuration state for {@link CopyrightValidator}. */
+/** Configuration state for {@link CopyrightValidator} from All-Projects project.config file. */
 class ScannerConfig {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -88,6 +88,7 @@ class ScannerConfig {
     this.fromAccountId = 0;
   }
 
+  /** True when {@link CopyrightValidator} will behave the same with either config. */
   @Override
   public boolean equals(Object other) {
     if (this == other) {
@@ -99,6 +100,7 @@ class ScannerConfig {
     if (other instanceof ScannerConfig) {
       ScannerConfig otherConfig = (ScannerConfig) other;
       return defaultEnable == otherConfig.defaultEnable
+          && fromAccountId == otherConfig.fromAccountId
           && messages.equals(otherConfig.messages)
           && alwaysReviewPath.equals(otherConfig.alwaysReviewPath)
           && matchProjects.equals(otherConfig.matchProjects)
@@ -116,6 +118,7 @@ class ScannerConfig {
   public int hashCode() {
     return Objects.hash(
         defaultEnable,
+        fromAccountId,
         messages,
         alwaysReviewPath,
         matchProjects,
