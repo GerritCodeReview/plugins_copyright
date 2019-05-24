@@ -102,19 +102,19 @@ class CopyrightConfig
     Metrics(MetricMaker metricMaker) {
       readConfigTimer =
           metricMaker.newTimer(
-              "plugins/copyright/read_config_latency",
+              "read_config_latency",
               new Description("Time spent reading and parsing plugin configurations")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));
       checkConfigTimer =
           metricMaker.newTimer(
-              "plugins/copyright/check_config_latency",
+              "check_config_latency",
               new Description("Time spent testing proposed plugin configurations")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));
       testConfigTimer =
           metricMaker.newTimer(
-              "plugins/copyright/test_config_latency",
+              "test_config_latency",
               new Description("Time spent testing configurations against difficult file pattern")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));

@@ -102,35 +102,35 @@ public class CopyrightReviewApi {
       Field<String> project = Field.ofString("project", "project name");
       reviewCount =
           metricMaker.newCounter(
-              "plugin/copyright/review_count",
+              "review_count",
               new Description("Total number of posted reviews").setRate().setUnit("reviews"));
       commentCount =
           metricMaker.newCounter(
-              "plugin/copyright/comment_count",
+              "comment_count",
               new Description("Total number of posted review comments")
                   .setRate()
                   .setUnit("comments"));
       reviewTimer =
           metricMaker.newTimer(
-              "plugin/copyright/review_latency",
+              "review_latency",
               new Description("Time spent posting reviews to revisions")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));
       reviewCountByProject =
           metricMaker.newCounter(
-              "plugin/copyright/review_count_by_project",
+              "review_count_by_project",
               new Description("Total number of posted reviews").setRate().setUnit("reviews"),
               project);
       commentCountByProject =
           metricMaker.newCounter(
-              "plugin/copyright/comment_count_by_project",
+              "comment_count_by_project",
               new Description("Total number of posted review comments")
                   .setRate()
                   .setUnit("comments"),
               project);
       reviewTimerByProject =
           metricMaker.newTimer(
-              "plugin/copyright/review_latency_by_project",
+              "review_latency_by_project",
               new Description("Time spent posting reviews to revisions")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS),
