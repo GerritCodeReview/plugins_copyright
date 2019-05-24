@@ -84,6 +84,7 @@ or filtering using the comma separated tags:
   bazel test --test_tag_filters=@PLUGIN@ //...
 ````
 
+
 This project can be imported into the Eclipse IDE.
 Add the plugin name to the `CUSTOM_PLUGINS` set in
 Gerrit core in `tools/bzl/plugins.bzl`, and execute:
