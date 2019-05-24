@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,7 +83,6 @@ public class CopyrightValidator implements RevisionCreatedListener {
 
   @Singleton
   private static class Metrics {
-    final Counter0 scanCount;
     final Timer0 scanRevisionTimer;
     final Timer0 scanFileTimer;
     final Counter1 scanCountByProject;
@@ -92,15 +91,15 @@ public class CopyrightValidator implements RevisionCreatedListener {
     final Counter1 scanCountByBranch;
     final Timer1 scanRevisionTimerByBranch;
     final Timer1 scanFileTimerByBranch;
+    final Counter1 postReviewErrors;
+    final Counter1 addReviewerErrors;
+    final Counter1 skippedReviewWarnings;
+    final Counter1 scanErrors;
 
     @Inject
     Metrics(MetricMaker metricMaker) {
       Field<String> project = Field.ofString("project", "project name");
       Field<String> branch = Field.ofString("branch", "branch name");
-      scanCount =
-          metricMaker.newCounter(
-              "scan_count",
-              new Description("Total number of copyright scans").setRate().setUnit("scans"));
       scanRevisionTimer =
           metricMaker.newTimer(
               "scan_revision_latency",
@@ -151,6 +150,34 @@ public class CopyrightValidator implements RevisionCreatedListener {
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS),
               branch);
+      postReviewErrors =
+          metricMaker.newCounter(
+              "scan_post_review_error_count",
+              new Description("Number of failed attempts to post reviews for scanned revisions")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
+      addReviewerErrors =
+          metricMaker.newCounter(
+              "scan_add_reviewer_error_count",
+              new Description("Number of failed attempts to add reviewers for scanned revisions")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
+      skippedReviewWarnings =
+          metricMaker.newCounter(
+              "skipped_scan_warning_count",
+              new Description("Number revision scans skipped due to configuration problems")
+                  .setRate()
+                  .setUnit("warnings"),
+              project);
+      scanErrors =
+          metricMaker.newCounter(
+              "failed_scan_error_count",
+              new Description("Number of failed attempts to scan revisions")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
     }
   }
 
@@ -191,6 +218,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
       logger.atWarning().log(
           "%s plugin enabled with no configuration -- not scanning revision %s",
           pluginName, event.getChange().currentRevision);
+      metrics.skippedReviewWarnings.increment(project);
       return;
     }
     if (scannerConfig.scanner == null) {
@@ -199,6 +227,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
         logger.atWarning().log(
             "%s plugin enabled with errors in configuration -- not scanning revision %s",
             pluginName, event.getChange().currentRevision);
+        metrics.skippedReviewWarnings.increment(project);
       } // else plugin not enabled
       return;
     }
@@ -211,6 +240,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
     } catch (IOException | RestApiException e) {
       logger.atSevere().withCause(e).log(
           "%s plugin cannot scan revision %s", pluginName, event.getChange().currentRevision);
+      metrics.scanErrors.increment(project);
       return;
     }
   }
@@ -229,7 +259,6 @@ public class CopyrightValidator implements RevisionCreatedListener {
     Map<String, ImmutableList<Match>> findings = new HashMap<>();
     ArrayList<String> containedPaths = new ArrayList<>();
     long scanStart = System.nanoTime();
-    metrics.scanCount.increment();
     metrics.scanCountByProject.increment(project);
     metrics.scanCountByBranch.increment(branch);
 
@@ -285,6 +314,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
       logger.atSevere().log(
           "%s plugin revision %s: error posting review: %s",
           pluginName, event.getChange().currentRevision, result.error);
+      metrics.postReviewErrors.increment(project);
     }
     if (result != null && result.reviewers != null) {
       for (Map.Entry<String, AddReviewerResult> entry : result.reviewers.entrySet()) {
@@ -293,6 +323,7 @@ public class CopyrightValidator implements RevisionCreatedListener {
           logger.atSevere().log(
               "%s plugin revision %s: error adding reviewer %s: %s",
               pluginName, event.getChange().currentRevision, entry.getKey(), arr.error);
+          metrics.addReviewerErrors.increment(project);
         }
       }
     }

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,10 +57,11 @@ public class CheckConfig {
   private static final String LABEL = "label";
   private static final String PLUGIN = "plugin";
   private static final int BUFFER_SIZE = 2048;
-  private static final char[] BUFFER = new char[BUFFER_SIZE];
 
   private String pluginName;
+  /** All-Projects project.config contents. */
   private Config configProject;
+  /** Plugin config from All-Projects project.config file. */
   ScannerConfig scannerConfig;
 
   public CheckConfig(String pluginName, String projectConfigContents)
@@ -80,27 +81,6 @@ public class CheckConfig {
     PluginConfig pluginConfig = new PluginConfig(pluginName, config);
     this.scannerConfig = new ScannerConfig(pluginName);
     this.scannerConfig.readConfigFile(pluginConfig);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (other == null) {
-      return false;
-    }
-    if (other instanceof CheckConfig) {
-      CheckConfig that = (CheckConfig) other;
-      return Objects.equals(this.pluginName, that.pluginName)
-          && Objects.equals(this.scannerConfig, that.scannerConfig);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(pluginName, scannerConfig);
   }
 
   /**
@@ -139,6 +119,8 @@ public class CheckConfig {
                     "no [" + LABEL + " \"" + labelName + "\"] section configured."),
                 pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
       }
+
+      // Enforce at least 1 approver exists for the copyright review label for content changes.
       String[] voters =
           trialConfig.configProject.getStringList(
               ACCESS, RefNames.REFS_HEADS + "*", "label-" + labelName);
@@ -162,6 +144,8 @@ public class CheckConfig {
                         + "*"),
                 pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
       }
+
+      // Enforce an approver exists for the copyright review label for configuration changes.
       voters =
           trialConfig.configProject.getStringList(
               ACCESS, RefNames.REFS_CONFIG, "label-" + labelName);
@@ -252,7 +236,7 @@ public class CheckConfig {
    * the output on success into the commit message.
    *
    * <p>This method scans the commit message to find the copied text. If the text was created for
-   * the same pattern signagure, this method returns a single valid finding with the number of
+   * the same pattern signature, this method returns a single valid finding with the number of
    * microseconds it took to scan a large file, which can be used to block patterns that cause
    * excessive backtracking.
    *
@@ -436,7 +420,7 @@ public class CheckConfig {
   /** Read the contents of a project.config file from {@code ilr}. */
   private static String readProjectConfigFile(IndexedLineReader ilr) throws IOException {
     StringBuilder sb = new StringBuilder();
-    CharBuffer cb = CharBuffer.wrap(BUFFER);
+    CharBuffer cb = CharBuffer.wrap(new char[BUFFER_SIZE]);
     while (ilr.read(cb) >= 0) {
       cb.flip();
       sb.append(cb);
@@ -459,6 +443,7 @@ public class CheckConfig {
     return Hashing.farmHashFingerprint64().hashBytes(sb.toString().getBytes(UTF_8)).toString();
   }
 
+  // TODO: move check from command-line tool to background thread with timeout.
   /** Entry point for command-line tool to check for excessive backtracking. */
   public static void main(String[] args) {
     if (args.length != 2) {

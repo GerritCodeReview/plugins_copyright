@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,11 @@ import com.google.gerrit.extensions.events.GitReferenceUpdatedListener;
 import com.google.gerrit.extensions.events.RevisionCreatedListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.metrics.Counter0;
+import com.google.gerrit.metrics.Counter1;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
+import com.google.gerrit.metrics.Field;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.reviewdb.client.Project;
@@ -68,6 +71,7 @@ class CopyrightConfig
     implements CommitValidationListener, RevisionCreatedListener, GitReferenceUpdatedListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** Default value of timeTestMax configuration parameter for avoiding excessive backtracking. */
   private final long DEFAULT_MAX_ELAPSED_SECONDS = 8;
 
   private final Metrics metrics;
@@ -97,9 +101,17 @@ class CopyrightConfig
     final Timer0 readConfigTimer;
     final Timer0 checkConfigTimer;
     final Timer0 testConfigTimer;
+    final Counter0 postReviewErrors;
+    final Counter0 addReviewerErrors;
+    final Counter1 projectStateErrors;
+    final Counter1 projectConfigErrors;
+    final Counter1 configurationErrors;
+    final Counter0 errors;
 
     @Inject
     Metrics(MetricMaker metricMaker) {
+      Field<String> project = Field.ofString("project", "project name");
+
       readConfigTimer =
           metricMaker.newTimer(
               "read_config_latency",
@@ -118,6 +130,43 @@ class CopyrightConfig
               new Description("Time spent testing configurations against difficult file pattern")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));
+      postReviewErrors =
+          metricMaker.newCounter(
+              "post_review_error_count",
+              new Description("Number of failed attempts to post reviews")
+                  .setRate()
+                  .setUnit("errors"));
+      addReviewerErrors =
+          metricMaker.newCounter(
+              "add_reviewer_error_count",
+              new Description("Number of failed attempts to add a reviewer")
+                  .setRate()
+                  .setUnit("errors"));
+      projectStateErrors =
+          metricMaker.newCounter(
+              "read_project_state_error_count",
+              new Description("Number of failed attempts to read project state")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
+      projectConfigErrors =
+          metricMaker.newCounter(
+              "get_project_config_error_count",
+              new Description("Number of failed attempts to get config from project state")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
+      configurationErrors =
+          metricMaker.newCounter(
+              "read_configuration_error_count",
+              new Description("Number of failed attempts to read configuration")
+                  .setRate()
+                  .setUnit("errors"),
+              project);
+      errors =
+          metricMaker.newCounter(
+              "error_count",
+              new Description("Number of errors of any kind").setRate().setUnit("errors"));
     }
   }
 
@@ -183,11 +232,11 @@ class CopyrightConfig
     }
     long nanoStart = System.nanoTime();
     try {
-      clearConfig();
       checkConfig = readConfig(event.getNewObjectId());
     } catch (IOException | ConfigInvalidException e) {
       logger.atSevere().withCause(e).log("%s plugin unable to load configuration", pluginName);
-      checkConfig = null;
+      metrics.configurationErrors.increment(allProjectsName.get());
+      metrics.errors.increment();
       return;
     } finally {
       long elapsedMicros = (System.nanoTime() - nanoStart) / 1000;
@@ -245,6 +294,8 @@ class CopyrightConfig
       logger.atSevere().withCause(e).log("unable to parse %s plugin config", pluginName);
       if (trialConfig != null && trialConfig.scannerConfig != null) {
         trialConfig.scannerConfig.messages.add(ScannerConfig.errorMessage(e.getMessage()));
+        metrics.configurationErrors.increment(allProjectsName.get());
+        metrics.errors.increment();
         return trialConfig.scannerConfig.messages;
       } else {
         throw new CommitValidationException("unable to parse new project.config", e);
@@ -294,7 +345,7 @@ class CopyrightConfig
       trialConfig = readConfig(event.getChange().currentRevision);
       elapsedMicros = (System.nanoTime() - readStart) / 1000;
       metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
-      if (Objects.equals(trialConfig, checkConfig.scannerConfig)) {
+      if (Objects.equals(trialConfig.scannerConfig, checkConfig.scannerConfig)) {
         return;
       }
 
@@ -328,7 +379,8 @@ class CopyrightConfig
       return;
     } catch (RestApiException | ConfigInvalidException | IOException e) {
       logger.atSevere().withCause(e).log("%s plugin unable to read new configuration", pluginName);
-      // throw IllegalStateException? RestApiException?
+      metrics.configurationErrors.increment(project);
+      metrics.errors.increment();
       return;
     } finally {
       if (trialConfig != null
@@ -347,8 +399,9 @@ class CopyrightConfig
           logReviewResultErrors(event, result);
         } catch (RestApiException e) {
           logger.atSevere().withCause(e).log(
-              "%s plugin unable to read new configuration", pluginName);
-          // throw IllegalStateException? RestApiException?
+              "%s plugin unable to report configuration findings", pluginName);
+          metrics.postReviewErrors.increment();
+          metrics.errors.increment();
           return;
         }
       }
@@ -381,18 +434,21 @@ class CopyrightConfig
       projectState = projectCache.checkedGet(Project.nameKey(project));
     } catch (IOException e) {
       logger.atSevere().withCause(e).log("error getting project state of %s", project);
-      // throw IllegalStateException? RestApiException?
+      metrics.projectStateErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     if (projectState == null) {
       logger.atSevere().log("error getting project state of %s", project);
-      // throw IllegalStateException? RestApiException?
+      metrics.projectStateErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     ProjectConfig projectConfig = projectState.getConfig();
     if (projectConfig == null) {
       logger.atWarning().log("error getting project config of %s", project);
-      // throw IllegalStateException? RestApiException? return?
+      metrics.projectConfigErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     PluginConfig pluginConfig = projectConfig.getPluginConfig(pluginName);
@@ -436,16 +492,13 @@ class CopyrightConfig
     return checkConfig;
   }
 
-  /** Erases any prior configuration state. */
-  private void clearConfig() {
-    checkConfig = null;
-  }
-
   private void logReviewResultErrors(RevisionCreatedListener.Event event, ReviewResult result) {
     if (!Strings.isNullOrEmpty(result.error)) {
       logger.atSevere().log(
           "%s plugin revision %s: error posting review: %s",
           pluginName, event.getChange().currentRevision, result.error);
+      metrics.postReviewErrors.increment();
+      metrics.errors.increment();
     }
     for (Map.Entry<String, AddReviewerResult> entry : result.reviewers.entrySet()) {
       AddReviewerResult arr = entry.getValue();
@@ -453,6 +506,8 @@ class CopyrightConfig
         logger.atSevere().log(
             "%s plugin revision %s: error adding reviewer %s: %s",
             pluginName, event.getChange().currentRevision, entry.getKey(), arr.error);
+        metrics.addReviewerErrors.increment();
+        metrics.errors.increment();
       }
     }
   }
