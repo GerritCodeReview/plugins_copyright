@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import static com.googlesource.gerrit.plugins.copyright.ScannerConfig.KEY_THIRD_
 import static com.googlesource.gerrit.plugins.copyright.TestConfig.LOCAL_BRANCH;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
 import com.google.common.truth.Correspondence;
 import com.google.gerrit.acceptance.GerritConfig;
 import com.google.gerrit.acceptance.GerritConfigs;
@@ -47,6 +48,8 @@ import org.junit.Test;
 
 @TestPlugin(name = "copyright", sysModule = "com.googlesource.gerrit.plugins.copyright.Module")
 public class CopyrightConfigIT extends LightweightPluginDaemonTest {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @Test
   @GerritConfigs({
     @GerritConfig(name = "plugin.copyright.enable", value = "true"),
@@ -99,7 +102,9 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
   })
   public void testCopyrightConfig_pushWithSenderNoName() throws Exception {
     TestAccount anonymous =
-        accountCreator.create("copyright-scan", "", "", "Non-Interactive Users", expertGroup.name);
+        accountCreator.create(
+            "copyright-scan", "", "", "Administrators", "Non-Interactive Users", expertGroup.name);
+
     testConfig.updatePlugin(
         cfg -> {
           cfg.setInt(KEY_FROM, anonymous.id().get());
@@ -317,6 +322,7 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
             "copyright-scanner",
             "copyright-scanner@example.com",
             "Copyright Scanner",
+            "Administrators",
             "Non-Interactive Users",
             expertGroup.name);
     reviewer =
@@ -360,16 +366,9 @@ public class CopyrightConfigIT extends LightweightPluginDaemonTest {
   }
 
   private static Correspondence<Comment, String> warningContains() {
-    return new Correspondence<Comment, String>() {
-      @Override
-      public boolean compare(Comment actual, String expected) {
-        return actual.message.startsWith("WARNING ") && actual.message.contains(expected);
-      }
-
-      @Override
-      public String toString() {
-        return "matches regex";
-      }
-    };
+    return Correspondence.from(
+        (actual, expected) ->
+            actual.message.startsWith("WARNING ") && actual.message.contains(expected),
+        "matches regex");
   }
 }

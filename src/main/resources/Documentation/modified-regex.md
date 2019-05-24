@@ -10,6 +10,7 @@ Configured patterns are basically [regular
 expressions](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html)
 with modifications to assist the 3 requirements above.
 
+
 ## Unlimited Wildcards
 
 If you run the ScanTool.java command-line tool against the files in your
