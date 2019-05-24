@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -434,17 +434,10 @@ public class CopyrightValidatorIT extends LightweightPluginDaemonTest {
   }
 
   private static Correspondence<Comment, CommentMatch> commentContains() {
-    return new Correspondence<Comment, CommentMatch>() {
-      @Override
-      public boolean compare(Comment actual, CommentMatch expected) {
-        return actual.unresolved != expected.resolved && actual.message.contains(expected.content);
-      }
-
-      @Override
-      public String toString() {
-        return "comment resolution status and content matches";
-      }
-    };
+    return Correspondence.from(
+        (actual, expected) ->
+            actual.unresolved != expected.resolved && actual.message.contains(expected.content),
+        "comment resolution status and content matches");
   }
 
   private static class CommentMatch {

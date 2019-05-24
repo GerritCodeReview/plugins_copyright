@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
@@ -37,6 +38,7 @@ import java.nio.CharBuffer;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.jgit.errors.ConfigInvalidException;
@@ -57,10 +59,11 @@ public class CheckConfig {
   private static final String LABEL = "label";
   private static final String PLUGIN = "plugin";
   private static final int BUFFER_SIZE = 2048;
-  private static final char[] BUFFER = new char[BUFFER_SIZE];
 
   private String pluginName;
+  /** All-Projects project.config contents. */
   private Config configProject;
+  /** Plugin config from All-Projects project.config file. */
   ScannerConfig scannerConfig;
 
   public CheckConfig(String pluginName, String projectConfigContents)
@@ -82,27 +85,6 @@ public class CheckConfig {
     this.scannerConfig.readConfigFile(pluginConfig);
   }
 
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (other == null) {
-      return false;
-    }
-    if (other instanceof CheckConfig) {
-      CheckConfig that = (CheckConfig) other;
-      return Objects.equals(this.pluginName, that.pluginName)
-          && Objects.equals(this.scannerConfig, that.scannerConfig);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(pluginName, scannerConfig);
-  }
-
   /**
    * Validates the final state of {@code trialConfig}.
    *
@@ -111,6 +93,9 @@ public class CheckConfig {
    */
   public static void checkProjectConfig(
       CopyrightReviewApi reviewApi, boolean pluginEnabled, CheckConfig trialConfig) {
+    // Warn without blocking project.config pushes when plugin disabled across entire server.
+    ValidationMessage.Type errorWhenActive =
+        pluginEnabled ? ValidationMessage.Type.ERROR : ValidationType.WARNING;
     CurrentUser fromUser =
         reviewApi == null
             ? null
@@ -127,7 +112,7 @@ public class CheckConfig {
                           ? "the plugin"
                           : fromUser.getLoggableName())
                       + " will vote on"),
-              pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
+              errorWhenActive));
     } else {
       String labelName = trialConfig.scannerConfig.reviewLabel.trim();
       if (!trialConfig.configProject.getSubsections(LABEL).contains(labelName)) {
@@ -137,8 +122,10 @@ public class CheckConfig {
                     ScannerConfig.KEY_REVIEW_LABEL,
                     labelName,
                     "no [" + LABEL + " \"" + labelName + "\"] section configured."),
-                pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
+                errorWhenActive));
       }
+
+      // Enforce at least 1 approver exists for the copyright review label for content changes.
       String[] voters =
           trialConfig.configProject.getStringList(
               ACCESS, RefNames.REFS_HEADS + "*", "label-" + labelName);
@@ -160,8 +147,10 @@ public class CheckConfig {
                         + " on "
                         + RefNames.REFS_HEADS
                         + "*"),
-                pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
+                errorWhenActive));
       }
+
+      // Enforce an approver exists for the copyright review label for configuration changes.
       voters =
           trialConfig.configProject.getStringList(
               ACCESS, RefNames.REFS_CONFIG, "label-" + labelName);
@@ -179,7 +168,7 @@ public class CheckConfig {
                     ScannerConfig.KEY_REVIEW_LABEL,
                     labelName,
                     "no configured approvers for " + labelName + " on " + RefNames.REFS_CONFIG),
-                pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
+                errorWhenActive));
       }
     }
     if (trialConfig.scannerConfig.reviewers.isEmpty()) {
@@ -199,7 +188,7 @@ public class CheckConfig {
                       + " non-interactive user with full voting permissions for the review label '"
                       + trialConfig.scannerConfig.reviewLabel
                       + "'"),
-              pluginEnabled ? ValidationMessage.Type.ERROR : ValidationMessage.Type.WARNING));
+              errorWhenActive));
       // TODO: inject ReviewerAdder into reviewApi, and use ReviewerAdder.prepare
       //       a la
       // https://gerrit.googlesource.com/gerrit/+/refs/heads/master/java/com/google/gerrit/server/restapi/change/PostReview.java#265
@@ -252,7 +241,7 @@ public class CheckConfig {
    * the output on success into the commit message.
    *
    * <p>This method scans the commit message to find the copied text. If the text was created for
-   * the same pattern signagure, this method returns a single valid finding with the number of
+   * the same pattern signature, this method returns a single valid finding with the number of
    * microseconds it took to scan a large file, which can be used to block patterns that cause
    * excessive backtracking.
    *
@@ -289,7 +278,6 @@ public class CheckConfig {
             new CopyrightReviewApi.CommitMessageFinding(
                 commitMessage, m.group(), m.group(1), m.start(), m.end()));
       }
-      logger.atSevere().log("signature for %s is %s", m.group(1), signature);
       builder.add(
           new CopyrightReviewApi.CommitMessageFinding(
               commitMessage, m.group(), m.start(), m.end()));
@@ -329,15 +317,14 @@ public class CheckConfig {
 
   /** Checks whether {@code trialConfig} might cause excessive backtracking. */
   private long timeLargeFileInMicros() throws IOException {
-    long startNanos = System.nanoTime();
+    Stopwatch sw = Stopwatch.createStarted();
     try {
       IndexedLineReader file = largeFile();
       scannerConfig.scanner.findMatches("file", -1, file);
     } finally {
-      long elapsedNanos = System.nanoTime() - startNanos;
-      long elapsedMicros = elapsedNanos / 1000;
-      logger.atFine().log("timeLargeFile %dms", elapsedMicros / 1000);
-      return elapsedMicros;
+      sw.stop();
+      logger.atFine().log("timeLargeFile %dms", sw.elapsed(TimeUnit.MILLISECONDS));
+      return sw.elapsed(TimeUnit.MICROSECONDS);
     }
   }
 
@@ -436,7 +423,7 @@ public class CheckConfig {
   /** Read the contents of a project.config file from {@code ilr}. */
   private static String readProjectConfigFile(IndexedLineReader ilr) throws IOException {
     StringBuilder sb = new StringBuilder();
-    CharBuffer cb = CharBuffer.wrap(BUFFER);
+    CharBuffer cb = CharBuffer.wrap(new char[BUFFER_SIZE]);
     while (ilr.read(cb) >= 0) {
       cb.flip();
       sb.append(cb);
@@ -459,6 +446,7 @@ public class CheckConfig {
     return Hashing.farmHashFingerprint64().hashBytes(sb.toString().getBytes(UTF_8)).toString();
   }
 
+  // TODO: move check from command-line tool to background thread with timeout.
   /** Entry point for command-line tool to check for excessive backtracking. */
   public static void main(String[] args) {
     if (args.length != 2) {

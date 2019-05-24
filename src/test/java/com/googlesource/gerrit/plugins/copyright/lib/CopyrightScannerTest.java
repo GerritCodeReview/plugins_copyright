@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,17 +36,7 @@ import org.junit.runners.JUnit4;
 public class CopyrightScannerTest {
 
   private static final Correspondence<String, String> CONTAINS_STRING =
-      new Correspondence<String, String>() {
-        @Override
-        public boolean compare(String actual, String expected) {
-          return actual.contains(expected);
-        }
-
-        @Override
-        public String toString() {
-          return "contains";
-        }
-      };
+      Correspondence.from((actual, expected) -> actual.contains(expected), "contains");
 
   private CopyrightPatterns.RuleSet.Builder builder;
 
