@@ -99,54 +99,54 @@ public class CopyrightValidator implements RevisionCreatedListener {
       Field<String> branch = Field.ofString("branch", "branch name");
       scanCount =
           metricMaker.newCounter(
-              "plugin/copyright/scan_count",
+              "scan_count",
               new Description("Total number of copyright scans").setRate().setUnit("scans"));
       scanRevisionTimer =
           metricMaker.newTimer(
-              "plugin/copyright/scan_revision_latency",
+              "scan_revision_latency",
               new Description("Time spent scanning entire revisions")
                   .setCumulative()
                   .setUnit(Units.MILLISECONDS));
       scanFileTimer =
           metricMaker.newTimer(
-              "plugin/copyright/scan_file_latency",
+              "scan_file_latency",
               new Description("Time spent scanning each file")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS));
       scanCountByProject =
           metricMaker.newCounter(
-              "plugin/copyright/scan_count_by_project",
+              "scan_count_by_project",
               new Description("Total number of copyright scans").setRate().setUnit("scans"),
               project);
       scanRevisionTimerByProject =
           metricMaker.newTimer(
-              "plugin/copyright/scan_revision_latency_by_project",
+              "scan_revision_latency_by_project",
               new Description("Time spent scanning entire revisions")
                   .setCumulative()
                   .setUnit(Units.MILLISECONDS),
               project);
       scanFileTimerByProject =
           metricMaker.newTimer(
-              "plugin/copyright/scan_file_latency_by_project",
+              "scan_file_latency_by_project",
               new Description("Time spent scanning each file")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS),
               project);
       scanCountByBranch =
           metricMaker.newCounter(
-              "plugin/copyright/scan_count_by_branch",
+              "scan_count_by_branch",
               new Description("Total number of copyright scans").setRate().setUnit("scans"),
               branch);
       scanRevisionTimerByBranch =
           metricMaker.newTimer(
-              "plugin/copyright/scan_revision_latency_by_branch",
+              "scan_revision_latency_by_branch",
               new Description("Time spent scanning entire revisions")
                   .setCumulative()
                   .setUnit(Units.MILLISECONDS),
               branch);
       scanFileTimerByBranch =
           metricMaker.newTimer(
-              "plugin/copyright/scan_file_latency_by_branch",
+              "scan_file_latency_by_branch",
               new Description("Time spent scanning each file")
                   .setCumulative()
                   .setUnit(Units.MICROSECONDS),
