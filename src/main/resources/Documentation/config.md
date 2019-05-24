@@ -43,6 +43,7 @@ plugin.@PLUGIN@.timeTestMax
     the command-line tool, to take heed of any warnings or errors it prints, and
     to copy+paste the token.
 
+
 ## Project Configuration
 
 Each project's `project.config` has a configuration parameter to enable or to
@@ -216,7 +217,8 @@ plugin.@PLUGIN@.fromAccountId
 
     Review comments will appear to come from the given account. Recommend
     creating a non-interactive user with a descriptive name like
-    "Copyright Scanner".
+    "Copyright Scanner". Must have read access to refs/heads/* and to
+    refs/meta/config in all repositories.
 
 plugin.@PLUGIN@.matchProjects
 :    List of Project Patterns to Scan
