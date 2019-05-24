@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PluginUser;
 import com.google.gerrit.server.account.GroupMembership;
+import com.google.gerrit.server.util.ThreadLocalRequestContext;
 import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Match;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,21 +54,15 @@ public class CopyrightReviewApiTest {
   private IdentifiedUser.GenericFactory identifiedUserFactory =
       createMock(IdentifiedUser.GenericFactory.class);
 
+  private ThreadLocalRequestContext requestContext = createMock(ThreadLocalRequestContext.class);
+
   private CopyrightReviewApi reviewApi;
 
   @Before
   public void setUp() throws Exception {
     reviewApi =
         new CopyrightReviewApi(
-            null,
-            () -> pluginUser,
-            () -> currentUser,
-            identifiedUserFactory,
-            null,
-            null,
-            null,
-            null,
-            null);
+            null, () -> pluginUser, () -> currentUser, identifiedUserFactory, requestContext, null);
   }
 
   @Test

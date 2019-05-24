@@ -43,6 +43,7 @@ plugin.@PLUGIN@.timeTestMax
     the command-line tool, to take heed of any warnings or errors it prints, and
     to copy+paste the token.
 
+
 ## Project Configuration
 
 Each project's `project.config` has a configuration parameter to enable or to

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,10 @@ import static com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Par
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.extensions.api.GerritApi;
+import com.google.gerrit.extensions.api.changes.ChangeApi;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput;
 import com.google.gerrit.extensions.api.changes.ReviewResult;
@@ -34,8 +35,6 @@ import com.google.gerrit.extensions.client.Comment;
 import com.google.gerrit.extensions.client.ReviewerState;
 import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.events.RevisionCreatedListener;
-import com.google.gerrit.extensions.restapi.IdString;
-import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Counter0;
 import com.google.gerrit.metrics.Counter1;
@@ -46,19 +45,13 @@ import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.reviewdb.client.Account;
-import com.google.gerrit.reviewdb.client.Change;
-import com.google.gerrit.reviewdb.client.PatchSet;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
-import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.PluginUser;
-import com.google.gerrit.server.change.ChangeResource;
-import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
-import com.google.gerrit.server.notedb.ChangeNotes;
-import com.google.gerrit.server.restapi.change.ListChangeComments;
-import com.google.gerrit.server.restapi.change.PostReview;
+import com.google.gerrit.server.util.ManualRequestContext;
+import com.google.gerrit.server.util.ThreadLocalRequestContext;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.copyright.lib.CopyrightScanner.Match;
@@ -82,11 +75,8 @@ public class CopyrightReviewApi {
   private final Provider<PluginUser> pluginUserProvider;
   private final Provider<CurrentUser> userProvider;
   private final IdentifiedUser.GenericFactory identifiedUserFactory;
-  private final ChangeNotes.Factory changeNotesFactory;
-  private final ChangeResource.Factory changeResourceFactory;
-  private final PatchSetUtil psUtil;
-  private final PostReview postReview;
-  private final ListChangeComments listChangeComments;
+  private final ThreadLocalRequestContext requestContext;
+  private final GerritApi gApi;
 
   @Singleton
   static class Metrics {
@@ -144,20 +134,14 @@ public class CopyrightReviewApi {
       Provider<PluginUser> pluginUserProvider,
       Provider<CurrentUser> userProvider,
       IdentifiedUser.GenericFactory identifiedUserFactory,
-      ChangeNotes.Factory changeNotesFactory,
-      ChangeResource.Factory changeResourceFactory,
-      PatchSetUtil psUtil,
-      PostReview postReview,
-      ListChangeComments listChangeComments) {
+      ThreadLocalRequestContext requestContext,
+      GerritApi gApi) {
     this.metrics = metrics;
     this.pluginUserProvider = pluginUserProvider;
     this.userProvider = userProvider;
     this.identifiedUserFactory = identifiedUserFactory;
-    this.changeNotesFactory = changeNotesFactory;
-    this.changeResourceFactory = changeResourceFactory;
-    this.psUtil = psUtil;
-    this.postReview = postReview;
-    this.listChangeComments = listChangeComments;
+    this.requestContext = requestContext;
+    this.gApi = gApi;
   }
 
   /**
@@ -207,41 +191,43 @@ public class CopyrightReviewApi {
         oldConfig != null && oldConfig.fromAccountId > 0
             ? oldConfig.fromAccountId
             : newConfig.fromAccountId;
-    ChangeResource change = getChange(event, fromAccountId);
-    Map<String, List<CommentInfo>> priorReviewComments = getComments(change);
-    if (priorReviewComments == null) {
-      priorReviewComments = ImmutableMap.of();
-    }
-    HashSet<CommentInfo> priorComments = new HashSet<>();
-    priorComments.addAll(priorReviewComments.get("/COMMIT_MSG"));
-
-    ReviewInput ri = new ReviewInput();
-    ri.message(getCommitMessageMessage(pluginName, findings, maxElapsedSeconds));
-    ImmutableList<CommentInput> comments =
-        ImmutableList.copyOf(
-            getCommitMessageComments(pluginName, findings, maxElapsedSeconds).stream()
-                .filter(ci -> !priorComments.contains(ci))
-                .toArray(i -> new CommentInput[i]));
-    if (!comments.isEmpty()) {
-      ri.comments = ImmutableMap.of("/COMMIT_MSG", comments);
-    }
-    String label = "Code-Review";
-    if (!Strings.isNullOrEmpty(oldConfig.reviewLabel)) {
-      label = oldConfig.reviewLabel;
-    } else if (!Strings.isNullOrEmpty(newConfig.reviewLabel)) {
-      label = newConfig.reviewLabel;
-    }
-    int vote = (findings.size() != 1 || !findings.get(0).isValid()) ? -2 : 2;
-    if (vote == 2) {
-      long elapsedMicros = findings.get(0).elapsedMicros;
-      if (elapsedMicros > maxElapsedSeconds * 1000000) {
-        vote = -2;
-      } else if (elapsedMicros > 2000000) {
-        vote = 1;
+    try (ManualRequestContext ctx = getContext(fromAccountId)) {
+      ChangeApi cApi = gApi.changes().id(event.getChange().id);
+      Map<String, List<CommentInfo>> priorReviewComments = cApi.comments();
+      if (priorReviewComments == null) {
+        priorReviewComments = ImmutableMap.of();
       }
+      HashSet<CommentInfo> priorComments = new HashSet<>();
+      priorComments.addAll(priorReviewComments.get("/COMMIT_MSG"));
+
+      ReviewInput ri = new ReviewInput();
+      ri.message(getCommitMessageMessage(pluginName, findings, maxElapsedSeconds));
+      ImmutableList<CommentInput> comments =
+          ImmutableList.copyOf(
+              getCommitMessageComments(pluginName, findings, maxElapsedSeconds).stream()
+                  .filter(ci -> !priorComments.contains(ci))
+                  .toArray(i -> new CommentInput[i]));
+      if (!comments.isEmpty()) {
+        ri.comments = ImmutableMap.of("/COMMIT_MSG", comments);
+      }
+      String label = "Code-Review";
+      if (!Strings.isNullOrEmpty(oldConfig.reviewLabel)) {
+        label = oldConfig.reviewLabel;
+      } else if (!Strings.isNullOrEmpty(newConfig.reviewLabel)) {
+        label = newConfig.reviewLabel;
+      }
+      int vote = (findings.size() != 1 || !findings.get(0).isValid()) ? -2 : 2;
+      if (vote == 2) {
+        long elapsedMicros = findings.get(0).elapsedMicros;
+        if (elapsedMicros > maxElapsedSeconds * 1000000) {
+          vote = -2;
+        } else if (elapsedMicros > 2000000) {
+          vote = 1;
+        }
+      }
+      ri.label(label, vote);
+      return cApi.current().review(ri);
     }
-    ri.label(label, vote);
-    return review(change, ri);
   }
 
   /**
@@ -312,18 +298,18 @@ public class CopyrightReviewApi {
     metrics.reviewCount.increment();
     metrics.reviewCountByProject.increment(project);
 
-    try {
-      int fromAccountId =
-          oldConfig != null && oldConfig.fromAccountId > 0
-              ? oldConfig.fromAccountId
-              : newConfig.fromAccountId;
-      ChangeResource change = getChange(event, fromAccountId);
+    int fromAccountId =
+        oldConfig != null && oldConfig.fromAccountId > 0
+            ? oldConfig.fromAccountId
+            : newConfig.fromAccountId;
+    try (ManualRequestContext ctx = getContext(fromAccountId)) {
+      ChangeApi cApi = gApi.changes().id(event.getChange().id);
       StringBuilder message = new StringBuilder();
       message.append(pluginName);
       message.append(" plugin issues parsing new configuration");
       ReviewInput ri = new ReviewInput().message(message.toString());
 
-      Map<String, List<CommentInfo>> priorComments = getComments(change);
+      Map<String, List<CommentInfo>> priorComments = cApi.comments();
       if (priorComments == null) {
         priorComments = ImmutableMap.of();
       }
@@ -350,7 +336,7 @@ public class CopyrightReviewApi {
       }
       metrics.commentCount.incrementBy((long) numComments);
       metrics.commentCountByProject.incrementBy(project, (long) numComments);
-      return review(change, ri);
+      return cApi.current().review(ri);
     } finally {
       long elapsedMicros = (System.nanoTime() - startNanos) / 1000;
       metrics.reviewTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
@@ -377,7 +363,7 @@ public class CopyrightReviewApi {
     metrics.reviewCount.increment();
     metrics.reviewCountByProject.increment(project);
 
-    try {
+    try (ManualRequestContext ctx = getContext(scannerConfig.fromAccountId)) {
       boolean tpAllowed = scannerConfig.isThirdPartyAllowed(project);
       boolean reviewRequired = false;
       for (Map.Entry<String, ImmutableList<Match>> entry : findings.entrySet()) {
@@ -395,7 +381,7 @@ public class CopyrightReviewApi {
           break;
         }
       }
-      ChangeResource change = getChange(event, scannerConfig.fromAccountId);
+      ChangeApi cApi = gApi.changes().id(event.getChange().id);
       ReviewInput ri =
           new ReviewInput()
               .message("Copyright scan")
@@ -411,7 +397,7 @@ public class CopyrightReviewApi {
       } else {
         ri = ri.message("This change appears to comply with copyright requirements.");
       }
-      Map<String, List<CommentInfo>> priorComments = getComments(change);
+      Map<String, List<CommentInfo>> priorComments = cApi.comments();
       if (priorComments == null) {
         priorComments = ImmutableMap.of();
       }
@@ -450,7 +436,7 @@ public class CopyrightReviewApi {
       }
       metrics.commentCount.incrementBy((long) numCommentsAdded);
       metrics.commentCountByProject.incrementBy(project, (long) numCommentsAdded);
-      return review(change, ri);
+      return cApi.current().review(ri);
     } finally {
       long elapsedMicros = (System.nanoTime() - startNanos) / 1000;
       metrics.reviewTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
@@ -631,26 +617,13 @@ public class CopyrightReviewApi {
     return sb.toString();
   }
 
-  /**
-   * Constructs a {@link com.google.gerrit.server.change.ChangeResource} from the notes log for the
-   * change onto which a new revision was pushed.
-   *
-   * @param event describes the newly pushed revision
-   * @param fromAccountId identifies the configured user to impersonate when sending review comments
-   * @throws RestApiException if an error occurs looking up the notes log for the change
-   */
-  private ChangeResource getChange(RevisionCreatedListener.Event event, int fromAccountId)
-      throws RestApiException {
-    try {
-      CurrentUser fromUser = getSendingUser(fromAccountId);
-      ChangeNotes notes = changeNotesFactory.createChecked(Change.id(event.getChange()._number));
-      return changeResourceFactory.create(notes, fromUser);
-    } catch (Exception e) {
-      Throwables.throwIfUnchecked(e);
-      throw e instanceof RestApiException
-          ? (RestApiException) e
-          : new RestApiException("Cannot load change", e);
-    }
+  private ManualRequestContext getContext(int fromAccountId) {
+    PluginUser pluginUser = pluginUserProvider.get();
+    CurrentUser user =
+        fromAccountId <= 0
+            ? userProvider.get()
+            : identifiedUserFactory.runAs(null, Account.id(fromAccountId), pluginUser);
+    return new ManualRequestContext(user, requestContext);
   }
 
   /**
@@ -663,44 +636,6 @@ public class CopyrightReviewApi {
       ri = ri.reviewer(reviewer, type, true);
     }
     return ri;
-  }
-
-  /**
-   * Retrieves all of the prior review comments already attached to {@code change}.
-   *
-   * @throws RestApiException if an error occurs retrieving the comments
-   */
-  private Map<String, List<CommentInfo>> getComments(ChangeResource change)
-      throws RestApiException {
-    try {
-      return listChangeComments.apply(change);
-    } catch (Exception e) {
-      Throwables.throwIfUnchecked(e);
-      throw e instanceof RestApiException
-          ? (RestApiException) e
-          : new RestApiException("Cannot list comments", e);
-    }
-  }
-
-  /**
-   * Adds the code review described by {@code ri} to the review thread of {@code change}.
-   *
-   * @throws RestApiException if an error occurs updating the review thread
-   */
-  private ReviewResult review(ChangeResource change, ReviewInput ri) throws RestApiException {
-    try {
-      PatchSet ps = psUtil.current(change.getNotes());
-      if (ps == null) {
-        throw new ResourceNotFoundException(IdString.fromDecoded("current"));
-      }
-      RevisionResource revision = RevisionResource.createNonCacheable(change, ps);
-      return postReview.apply(revision, ri).value();
-    } catch (Exception e) {
-      Throwables.throwIfUnchecked(e);
-      throw e instanceof RestApiException
-          ? (RestApiException) e
-          : new RestApiException("Cannot post review", e);
-    }
   }
 
   /** Returns true if {@code priorComments} already includes a comment identical to {@code ci}. */

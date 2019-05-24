@@ -15,3 +15,4 @@ To see the list of known names, earch for `lookup` in
 The names do not have to match an exact license or entity per se. For example,
 the Creative Commons folks do not define a CC_BY_C license. The named pattern
 matches any of several Creative Commons licenses that allow commercial use.
+
