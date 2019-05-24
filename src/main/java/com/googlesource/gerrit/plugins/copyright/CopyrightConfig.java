@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@ package com.googlesource.gerrit.plugins.copyright;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
@@ -24,13 +23,12 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.api.changes.AddReviewerResult;
 import com.google.gerrit.extensions.api.changes.ReviewResult;
 import com.google.gerrit.extensions.events.GitReferenceUpdatedListener;
+import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.events.RevisionCreatedListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.metrics.Description;
-import com.google.gerrit.metrics.Description.Units;
-import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.reviewdb.client.Project;
 import com.google.gerrit.reviewdb.client.RefNames;
 import com.google.gerrit.server.config.AllProjectsName;
@@ -51,7 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Constants;
@@ -65,9 +62,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 /** Listener to manage configuration for enforcing review of copyright declarations and licenses. */
 @Singleton
 class CopyrightConfig
-    implements CommitValidationListener, RevisionCreatedListener, GitReferenceUpdatedListener {
+    implements CommitValidationListener, RevisionCreatedListener, GitReferenceUpdatedListener,
+        LifecycleListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  /** Default value of timeTestMax configuration parameter for avoiding excessive backtracking. */
   private final long DEFAULT_MAX_ELAPSED_SECONDS = 8;
 
   private final Metrics metrics;
@@ -86,39 +85,11 @@ class CopyrightConfig
       @Override
       protected void configure() {
         DynamicSet.bind(binder(), CommitValidationListener.class).to(CopyrightConfig.class);
+        DynamicSet.bind(binder(), LifecycleListener.class).to(CopyrightConfig.class);
         DynamicSet.bind(binder(), RevisionCreatedListener.class).to(CopyrightConfig.class);
         DynamicSet.bind(binder(), GitReferenceUpdatedListener.class).to(CopyrightConfig.class);
       }
     };
-  }
-
-  @Singleton
-  private static class Metrics {
-    final Timer0 readConfigTimer;
-    final Timer0 checkConfigTimer;
-    final Timer0 testConfigTimer;
-
-    @Inject
-    Metrics(MetricMaker metricMaker) {
-      readConfigTimer =
-          metricMaker.newTimer(
-              "read_config_latency",
-              new Description("Time spent reading and parsing plugin configurations")
-                  .setCumulative()
-                  .setUnit(Units.MICROSECONDS));
-      checkConfigTimer =
-          metricMaker.newTimer(
-              "check_config_latency",
-              new Description("Time spent testing proposed plugin configurations")
-                  .setCumulative()
-                  .setUnit(Units.MICROSECONDS));
-      testConfigTimer =
-          metricMaker.newTimer(
-              "test_config_latency",
-              new Description("Time spent testing configurations against difficult file pattern")
-                  .setCumulative()
-                  .setUnit(Units.MICROSECONDS));
-    }
   }
 
   @Inject
@@ -129,8 +100,7 @@ class CopyrightConfig
       GitRepositoryManager repoManager,
       ProjectCache projectCache,
       PluginConfigFactory pluginConfigFactory,
-      CopyrightReviewApi reviewApi)
-      throws IOException, ConfigInvalidException {
+      CopyrightReviewApi reviewApi) {
     this.metrics = metrics;
     this.allProjectsName = allProjectsName;
     this.pluginName = pluginName;
@@ -138,39 +108,27 @@ class CopyrightConfig
     this.projectCache = projectCache;
     this.pluginConfigFactory = pluginConfigFactory;
     this.reviewApi = reviewApi;
-
-    long nanoStart = System.nanoTime();
-    try {
-      checkConfig = readConfig(projectCache.getAllProjects().getProject().getConfigRefState());
-    } finally {
-      long elapsedMicros = (System.nanoTime() - nanoStart) / 1000;
-      metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
-    }
-  }
-
-  private CopyrightConfig(
-      MetricMaker metricMaker, CopyrightReviewApi reviewApi, String projectConfigContents)
-      throws ConfigInvalidException {
-    metrics = new Metrics(metricMaker);
-    allProjectsName = new AllProjectsName("All-Projects");
-    pluginName = "copyright";
-    repoManager = null;
-    projectCache = null;
-    pluginConfigFactory = null;
-    this.reviewApi = reviewApi;
-    checkConfig = new CheckConfig(pluginName, projectConfigContents);
-  }
-
-  @VisibleForTesting
-  static CopyrightConfig createTestInstance(
-      MetricMaker metricMaker, CopyrightReviewApi reviewApi, String projectConfigContents)
-      throws ConfigInvalidException {
-    return new CopyrightConfig(metricMaker, reviewApi, projectConfigContents);
+    this.checkConfig = null;
   }
 
   ScannerConfig getScannerConfig() {
-    return checkConfig.scannerConfig;
+    return checkConfig == null ? null : checkConfig.scannerConfig;
   }
+
+  @Override
+  public void start() {
+    try (Timer0.Context ctx = metrics.readConfigTimer.start()) {
+      checkConfig = readConfig(projectCache.getAllProjects().getProject().getConfigRefState());
+    } catch (IOException | ConfigInvalidException e) {
+      logger.atSevere().withCause(e).log("unable to load configuration");
+      metrics.configurationErrors.increment(allProjectsName.get());
+      metrics.errors.increment();
+      return;
+    }
+  }
+
+  @Override
+  public void stop() {}
 
   /** Listens for merges to /refs/meta/config on All-Projects to reload plugin configuration. */
   @Override
@@ -181,17 +139,13 @@ class CopyrightConfig
     if (!event.getProjectName().equals(allProjectsName.get())) {
       return;
     }
-    long nanoStart = System.nanoTime();
-    try {
-      clearConfig();
+    try (Timer0.Context ctx = metrics.readConfigTimer.start()) {
       checkConfig = readConfig(event.getNewObjectId());
     } catch (IOException | ConfigInvalidException e) {
-      logger.atSevere().withCause(e).log("%s plugin unable to load configuration", pluginName);
-      checkConfig = null;
+      logger.atSevere().withCause(e).log("unable to load configuration");
+      metrics.configurationErrors.increment(allProjectsName.get());
+      metrics.errors.increment();
       return;
-    } finally {
-      long elapsedMicros = (System.nanoTime() - nanoStart) / 1000;
-      metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
     }
   }
 
@@ -205,58 +159,51 @@ class CopyrightConfig
     if (!event.getProjectNameKey().equals(allProjectsName)) {
       return Collections.emptyList();
     }
-    long readStart = System.nanoTime();
-    long checkStart = -1;
-    long elapsedMicros = -1;
     CheckConfig trialConfig = null;
     try {
-      trialConfig = readConfig(event.commit.getName());
-      elapsedMicros = (System.nanoTime() - readStart) / 1000;
-      metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
+      try (Timer0.Context ctx = metrics.readConfigTimer.start()) {
+        trialConfig = readConfig(event.commit.getName());
+      }
       if (Objects.equals(trialConfig.scannerConfig, checkConfig.scannerConfig)) {
         return Collections.emptyList();
       }
-      checkStart = System.nanoTime();
-      long maxElapsedSeconds =
-          gerritConfig == null
-              ? DEFAULT_MAX_ELAPSED_SECONDS
-              : gerritConfig.getLong(ScannerConfig.KEY_TIME_TEST_MAX, DEFAULT_MAX_ELAPSED_SECONDS);
-      if (maxElapsedSeconds > 0
-          && CheckConfig.hasScanner(trialConfig)
-          && !CheckConfig.scannersEqual(trialConfig, checkConfig)) {
-        String commitMessage = event.commit.getFullMessage();
-        ImmutableList<CopyrightReviewApi.CommitMessageFinding> findings =
-            trialConfig.checkCommitMessage(commitMessage);
-        if (CheckConfig.mustReportFindings(findings, maxElapsedSeconds)) {
-          throw reviewApi.getCommitMessageException(pluginName, findings, maxElapsedSeconds);
+      try (Timer0.Context ctx = metrics.checkConfigTimer.start()) {
+        long maxElapsedSeconds =
+            gerritConfig == null
+                ? DEFAULT_MAX_ELAPSED_SECONDS
+                : gerritConfig.getLong(
+                    ScannerConfig.KEY_TIME_TEST_MAX, DEFAULT_MAX_ELAPSED_SECONDS);
+        if (maxElapsedSeconds > 0
+            && CheckConfig.hasScanner(trialConfig)
+            && !CheckConfig.scannersEqual(trialConfig, checkConfig)) {
+          String commitMessage = event.commit.getFullMessage();
+          ImmutableList<CopyrightReviewApi.CommitMessageFinding> findings =
+              trialConfig.checkCommitMessage(commitMessage);
+          if (CheckConfig.mustReportFindings(findings, maxElapsedSeconds)) {
+            throw reviewApi.getCommitMessageException(pluginName, findings, maxElapsedSeconds);
+          }
         }
+        boolean pluginEnabled =
+            gerritConfig != null && gerritConfig.getBoolean(ScannerConfig.KEY_ENABLE, false);
+        CheckConfig.checkProjectConfig(reviewApi, pluginEnabled, trialConfig);
+        return trialConfig == null || trialConfig.scannerConfig == null
+            ? Collections.emptyList()
+            : trialConfig.scannerConfig.messages;
       }
-      boolean pluginEnabled =
-          gerritConfig != null && gerritConfig.getBoolean(ScannerConfig.KEY_ENABLE, false);
-      CheckConfig.checkProjectConfig(reviewApi, pluginEnabled, trialConfig);
-      return trialConfig == null || trialConfig.scannerConfig == null
-          ? Collections.emptyList()
-          : trialConfig.scannerConfig.messages;
     } catch (IOException e) {
-      logger.atSevere().withCause(e).log(
-          "failed to read new project.config for %s plugin", pluginName);
+      logger.atSevere().withCause(e).log("failed to read new project.config");
       throw new CommitValidationException("failed to read new project.config", e);
     } catch (ConfigInvalidException e) {
-      logger.atSevere().withCause(e).log("unable to parse %s plugin config", pluginName);
+      logger.atSevere().withCause(e).log("unable to parse plugin config");
       if (trialConfig != null && trialConfig.scannerConfig != null) {
         trialConfig.scannerConfig.messages.add(ScannerConfig.errorMessage(e.getMessage()));
+        metrics.configurationErrors.increment(allProjectsName.get());
+        metrics.errors.increment();
         return trialConfig.scannerConfig.messages;
       } else {
         throw new CommitValidationException("unable to parse new project.config", e);
       }
     } finally {
-      if (elapsedMicros < 0) {
-        elapsedMicros = (System.nanoTime() - readStart) / 1000;
-        metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
-      } else if (checkStart >= 0) {
-        long elapsedNanos = System.nanoTime() - checkStart;
-        metrics.checkConfigTimer.record(elapsedNanos, TimeUnit.NANOSECONDS);
-      }
       if (trialConfig != null
           && trialConfig.scannerConfig != null
           && trialConfig.scannerConfig.hasErrors()) {
@@ -286,49 +233,48 @@ class CopyrightConfig
       return;
     }
     // passed onCommitReceived so expect at worst only warnings here
-    long readStart = System.nanoTime();
-    long checkStart = -1;
-    long elapsedMicros = -1;
     CheckConfig trialConfig = null;
     try {
-      trialConfig = readConfig(event.getChange().currentRevision);
-      elapsedMicros = (System.nanoTime() - readStart) / 1000;
-      metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
-      if (Objects.equals(trialConfig, checkConfig.scannerConfig)) {
+      try (Timer0.Context ctx = metrics.readConfigTimer.start()) {
+        trialConfig = readConfig(event.getChange().currentRevision);
+      }
+      if (Objects.equals(trialConfig.scannerConfig, checkConfig.scannerConfig)) {
         return;
       }
 
-      checkStart = System.nanoTime();
-      if (CheckConfig.hasScanner(trialConfig)
-          && !CheckConfig.scannersEqual(trialConfig, checkConfig)) {
-        long maxElapsedSeconds =
-            gerritConfig == null
-                ? DEFAULT_MAX_ELAPSED_SECONDS
-                : gerritConfig.getLong(
-                    ScannerConfig.KEY_TIME_TEST_MAX, DEFAULT_MAX_ELAPSED_SECONDS);
-        if (maxElapsedSeconds > 0) {
-          String commitMessage = event.getRevision().commitWithFooters;
-          ImmutableList<CopyrightReviewApi.CommitMessageFinding> findings =
-              trialConfig.checkCommitMessage(commitMessage);
-          ReviewResult result =
-              reviewApi.reportCommitMessageFindings(
-                  pluginName,
-                  allProjectsName.get(),
-                  checkConfig == null ? null : checkConfig.scannerConfig,
-                  trialConfig.scannerConfig,
-                  event,
-                  findings,
-                  maxElapsedSeconds);
-          logReviewResultErrors(event, result);
+      try (Timer0.Context ctx = metrics.checkConfigTimer.start()) {
+        if (CheckConfig.hasScanner(trialConfig)
+            && !CheckConfig.scannersEqual(trialConfig, checkConfig)) {
+          long maxElapsedSeconds =
+              gerritConfig == null
+                  ? DEFAULT_MAX_ELAPSED_SECONDS
+                  : gerritConfig.getLong(
+                      ScannerConfig.KEY_TIME_TEST_MAX, DEFAULT_MAX_ELAPSED_SECONDS);
+          if (maxElapsedSeconds > 0) {
+            String commitMessage = event.getRevision().commitWithFooters;
+            ImmutableList<CopyrightReviewApi.CommitMessageFinding> findings =
+                trialConfig.checkCommitMessage(commitMessage);
+            ReviewResult result =
+                reviewApi.reportCommitMessageFindings(
+                    pluginName,
+                    allProjectsName.get(),
+                    checkConfig == null ? null : checkConfig.scannerConfig,
+                    trialConfig.scannerConfig,
+                    event,
+                    findings,
+                    maxElapsedSeconds);
+            logReviewResultErrors(event, result);
+          }
         }
+        boolean pluginEnabled =
+            gerritConfig != null && gerritConfig.getBoolean(ScannerConfig.KEY_ENABLE, false);
+        CheckConfig.checkProjectConfig(reviewApi, pluginEnabled, trialConfig);
+        return;
       }
-      boolean pluginEnabled =
-          gerritConfig != null && gerritConfig.getBoolean(ScannerConfig.KEY_ENABLE, false);
-      CheckConfig.checkProjectConfig(reviewApi, pluginEnabled, trialConfig);
-      return;
     } catch (RestApiException | ConfigInvalidException | IOException e) {
-      logger.atSevere().withCause(e).log("%s plugin unable to read new configuration", pluginName);
-      // throw IllegalStateException? RestApiException?
+      logger.atSevere().withCause(e).log("unable to read new configuration");
+      metrics.configurationErrors.increment(project);
+      metrics.errors.increment();
       return;
     } finally {
       if (trialConfig != null
@@ -346,18 +292,11 @@ class CopyrightConfig
                   event);
           logReviewResultErrors(event, result);
         } catch (RestApiException e) {
-          logger.atSevere().withCause(e).log(
-              "%s plugin unable to read new configuration", pluginName);
-          // throw IllegalStateException? RestApiException?
+          logger.atSevere().withCause(e).log("unable to report configuration findings");
+          metrics.postReviewErrors.increment(project);
+          metrics.errors.increment();
           return;
         }
-      }
-      if (elapsedMicros < 0) {
-        elapsedMicros = (System.nanoTime() - readStart) / 1000;
-        metrics.readConfigTimer.record(elapsedMicros, TimeUnit.MICROSECONDS);
-      } else if (checkStart >= 0) {
-        long elapsedNanos = System.nanoTime() - checkStart;
-        metrics.checkConfigTimer.record(elapsedNanos, TimeUnit.NANOSECONDS);
       }
     }
   }
@@ -381,18 +320,21 @@ class CopyrightConfig
       projectState = projectCache.checkedGet(Project.nameKey(project));
     } catch (IOException e) {
       logger.atSevere().withCause(e).log("error getting project state of %s", project);
-      // throw IllegalStateException? RestApiException?
+      metrics.projectStateErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     if (projectState == null) {
       logger.atSevere().log("error getting project state of %s", project);
-      // throw IllegalStateException? RestApiException?
+      metrics.projectStateErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     ProjectConfig projectConfig = projectState.getConfig();
     if (projectConfig == null) {
       logger.atWarning().log("error getting project config of %s", project);
-      // throw IllegalStateException? RestApiException? return?
+      metrics.projectConfigErrors.increment(project);
+      metrics.errors.increment();
       return scannerConfig.defaultEnable;
     }
     PluginConfig pluginConfig = projectConfig.getPluginConfig(pluginName);
@@ -436,23 +378,21 @@ class CopyrightConfig
     return checkConfig;
   }
 
-  /** Erases any prior configuration state. */
-  private void clearConfig() {
-    checkConfig = null;
-  }
-
   private void logReviewResultErrors(RevisionCreatedListener.Event event, ReviewResult result) {
     if (!Strings.isNullOrEmpty(result.error)) {
       logger.atSevere().log(
-          "%s plugin revision %s: error posting review: %s",
-          pluginName, event.getChange().currentRevision, result.error);
+          "revision %s: error posting review: %s", event.getChange().currentRevision, result.error);
+      metrics.postReviewErrors.increment(event.getChange().project);
+      metrics.errors.increment();
     }
     for (Map.Entry<String, AddReviewerResult> entry : result.reviewers.entrySet()) {
       AddReviewerResult arr = entry.getValue();
       if (!Strings.isNullOrEmpty(arr.error)) {
         logger.atSevere().log(
-            "%s plugin revision %s: error adding reviewer %s: %s",
-            pluginName, event.getChange().currentRevision, entry.getKey(), arr.error);
+            "revision %s: error adding reviewer %s: %s",
+            event.getChange().currentRevision, entry.getKey(), arr.error);
+        metrics.addReviewerErrors.increment(event.getChange().project);
+        metrics.errors.increment();
       }
     }
   }
