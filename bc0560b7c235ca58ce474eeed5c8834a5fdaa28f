@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "238527a9_db5adb6a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Ack\n\nPer your suggestion below, the check will move from `main` to a background thread.",
+      "parentUuid": "2eb8a14a_f58319ee",
+      "range": {
+        "startLine": 48,
+        "startChar": 13,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e71b8041_82ad4acd",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5c96e52_e91fb520",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e71b8041_82ad4acd",
+      "range": {
+        "startLine": 60,
+        "startChar": 43,
+        "endLine": 60,
+        "endChar": 47
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4207f7e5_7d88eb31",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d298cda_46139107",
+      "range": {
+        "startLine": 63,
+        "startChar": 17,
+        "endLine": 63,
+        "endChar": 30
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5d0af27_5e60a1ef",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55df40e4_47242196",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "The method is unused. Deleting.",
+      "parentUuid": "c5d0af27_5e60a1ef",
+      "range": {
+        "startLine": 96,
+        "startChar": 13,
+        "endLine": 96,
+        "endChar": 20
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "75a49a3c_59207f6d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Comments added. Can re-evaluate whether ProjectConfig might work after backtracking check moved to background thread. As it is now, must be simply Config to read from file in `main`; ProjectConfig too tightly bound to caching etc.",
+      "parentUuid": "a2f257da_b1d6b9a1",
+      "range": {
+        "startLine": 147,
+        "startChar": 44,
+        "endLine": 147,
+        "endChar": 52
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9f078cf8_76c73b9b",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
         "patchSetId": 2
@@ -137,6 +257,30 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49599dd4_11aeec3d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9f078cf8_76c73b9b",
+      "range": {
+        "startLine": 255,
+        "startChar": 22,
+        "endLine": 255,
+        "endChar": 31
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "ac09e0b5_14483c4a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CheckConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "\u003e doesn\u0027t the backtracking depend on the input file, ie. if it passes for the test file, it might still cause excessive backtracking on other inputs?\n\nIt does. For example, if one has a large file with long repetitions of the Italian lira symbol and one adds a pattern that matches any number of repetitions of that symbol, it could cause excessive backtracking. But how likely is that? It requires 2 unlikely events at the same time.\n\nThe intent of the check is not to completely eliminate the problem; the intent is reduce the risk (a lot). The test load simulates files known in the past to cause backtracking and that appear in significant numbers.\n\nIf a particular repository has enough files dissimilar to the test load and if a pattern is added that causes a problem for those files but not for the test load, presumably someone supporting production will eventually investigate and diagnose the problem.\n\nAfterward, the test load can have a section added to catch the problem, or a 2nd test load could be added where the check uses the longer of the 2 loads.\n\nSo, the check fills 2 roles: 1) it greatly reduces the risk and 2) it provides the scaffolding to address yet-to-be-discovered risks.\n\n\n\u003e Overall, having people validate the check by checking building the check tool looks very complicated both from the code and workflow perspective. I would rather see an overall timeout for the whole procedure, ie. run the check in a future with a timeout. If the timeout triggers, put a -2 vote on the change mentioning the timeout.\n\nI agree about the complexity. I hesitated running it on the server because it will occupy CPU and increase latency if done as part of commit validation. You seem to suggest moving the check to the revision-created.\n\nI can do that. I will do it at the same time as moving the scanner to the background thread.",
+      "parentUuid": "62cd7587_4d11c7bd",
+      "range": {
+        "startLine": 257,
+        "startChar": 5,
+        "endLine": 257,
+        "endChar": 28
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aded9b3e_c63c0023",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 2
@@ -183,6 +351,30 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec4e7074_fe11ff55",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aded9b3e_c63c0023",
+      "range": {
+        "startLine": 71,
+        "startChar": 21,
+        "endLine": 71,
+        "endChar": 48
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "0e6112c6_0dab8fd5",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb0a921a_34be2c17",
+      "range": {
+        "startLine": 190,
+        "startChar": 6,
+        "endLine": 190,
+        "endChar": 17
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c822eb5_9d628aea",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 2
@@ -223,6 +439,24 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11be7cca_664cc182",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c822eb5_9d628aea",
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -249,6 +483,30 @@
     },
     {
       "key": {
+        "uuid": "a45508ba_8d968a95",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8c1e20db_4ae7ac07",
+      "range": {
+        "startLine": 89,
+        "startChar": 35,
+        "endLine": 89,
+        "endChar": 53
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4bc56342_80a6d292",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
         "patchSetId": 2
@@ -260,6 +518,30 @@
       "writtenOn": "2019-05-27T17:37:32Z",
       "side": 1,
       "message": "ChangeApi#current",
+      "range": {
+        "startLine": 692,
+        "startChar": 27,
+        "endLine": 692,
+        "endChar": 34
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "44d983f2_5ea59903",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Not sure how to get a ChangeApi instance except via GerritApi, which authenticates against the user pushing the change instead of against the plugin.",
+      "parentUuid": "4bc56342_80a6d292",
       "range": {
         "startLine": 692,
         "startChar": 27,
@@ -289,6 +571,24 @@
     },
     {
       "key": {
+        "uuid": "9b2d3eb0_bbbd83d0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7e473c5b_540369fb",
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6adb1b48_e8e324b0",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidator.java",
         "patchSetId": 2
@@ -309,6 +609,30 @@
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd6cf97e_9403c3d1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6adb1b48_e8e324b0",
+      "range": {
+        "startLine": 232,
+        "startChar": 12,
+        "endLine": 232,
+        "endChar": 21
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -335,6 +659,30 @@
     },
     {
       "key": {
+        "uuid": "4044577d_e32045d7",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/ScannerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "183da8a9_d4a18f06",
+      "range": {
+        "startLine": 36,
+        "startChar": 18,
+        "endLine": 36,
+        "endChar": 23
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c75d33d_dff56fc5",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/ScannerConfig.java",
         "patchSetId": 2
@@ -358,6 +706,30 @@
     },
     {
       "key": {
+        "uuid": "c955187c_f5bb14bf",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/ScannerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c75d33d_dff56fc5",
+      "range": {
+        "startLine": 92,
+        "startChar": 17,
+        "endLine": 92,
+        "endChar": 23
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4f91a12_f44267a9",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidatorIT.java",
         "patchSetId": 2
@@ -375,6 +747,24 @@
     },
     {
       "key": {
+        "uuid": "9504399f_96efeab2",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidatorIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "Ack\n\nThat code is in CheckConfig and the tests are in CheckConfigIT.",
+      "parentUuid": "c4f91a12_f44267a9",
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e765ac06_55ec1e32",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidatorIT.java",
         "patchSetId": 2
@@ -386,6 +776,24 @@
       "writtenOn": "2019-05-27T17:37:32Z",
       "side": 1,
       "message": "ISTR that data members go near the top.",
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f42563b_a0a0e912",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/CopyrightValidatorIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-29T21:48:15Z",
+      "side": 1,
+      "message": "I modeled the order on other tests I saw starting with @Test(s) with all the set-up etc. below. Those might not have been gerrit team tests, though.\n\nI will put things in whatever order you desire. Just spell out the order you want. Thanks!",
+      "parentUuid": "e765ac06_55ec1e32",
       "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
