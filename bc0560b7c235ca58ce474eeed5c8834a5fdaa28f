@@ -554,6 +554,30 @@
     },
     {
       "key": {
+        "uuid": "c8af7670_c9fb2b34",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-05-30T23:13:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "44d983f2_5ea59903",
+      "range": {
+        "startLine": 692,
+        "startChar": 27,
+        "endLine": 692,
+        "endChar": 34
+      },
+      "revId": "bc0560b7c235ca58ce474eeed5c8834a5fdaa28f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7e473c5b_540369fb",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
         "patchSetId": 2
