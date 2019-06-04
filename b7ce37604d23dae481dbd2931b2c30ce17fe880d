@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dca9287a_66688fec",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Here and below: Please add the correct generic type parameter for type safety. Otherwise, issues (e.g. passing in wrong type) will only be surfaced during runtime.",
+      "range": {
+        "startLine": 106,
+        "startChar": 10,
+        "endLine": 106,
+        "endChar": 18
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb6d6f7e_514d8ee7",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Doing work in a constructor is strongly discouraged. Doing work which throws exceptions such as these and additionally having Guice for DI might cause serious issues (e.g. server can\u0027t even start if one of the exceptions is thrown). Please find a different way or tell me if you need further ideas.",
+      "range": {
+        "startLine": 182,
+        "startChar": 6,
+        "endLine": 182,
+        "endChar": 48
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92149dd7_149e245d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Here and elsewhere: Is there a reason not to use Stopwatch here?",
+      "range": {
+        "startLine": 191,
+        "startChar": 4,
+        "endLine": 191,
+        "endChar": 39
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca25b986_d11ea870",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "I didn\u0027t find any (Java) test path which uses these methods. Can you please point me to the code? (If we do need this code for some tests, could we rather move it close to the tests?)",
+      "range": {
+        "startLine": 200,
+        "startChar": 2,
+        "endLine": 218,
+        "endChar": 3
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04cc45e4_30251446",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Here and everywhere else this occurs: I see why those four \\n might be helpful when debugging the plugin while implementing it but we don\u0027t want to have four empty lines in our production logs.",
+      "range": {
+        "startLine": 235,
+        "startChar": 29,
+        "endLine": 235,
+        "endChar": 52
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "67240c00_ca65914f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Any log statements: Please only use the \u0027severe\u0027 level for severe errors. We typically don\u0027t want most of these log statements in our production logs except if we explicitly choose a finer log level.",
+      "range": {
+        "startLine": 235,
+        "startChar": 13,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49214eb7_d25422b1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "When will this log statement be helpful? Are you thinking of a specific failure case you want to have more details on?\n\nIf there\u0027s a reasonable failure case where this statement would be helpful, please use a more descriptive message.",
+      "range": {
+        "startLine": 235,
+        "startChar": 6,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d7bf46c_2dab719d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "I\u0027m not convinced that logging the whole CheckConfig is a good idea. It currently also doesn\u0027t work as you intended it originally as one of the later patch sets removed the toString() method from that class.",
+      "range": {
+        "startLine": 237,
+        "startChar": 6,
+        "endLine": 237,
+        "endChar": 74
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bfbfd222_5aeb1a8d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-04T15:30:31Z",
+      "side": 1,
+      "message": "Here and elsewhere: It shouldn\u0027t be necessary to explicitly add the plugin name to a log statement. If you find a log statement which doesn\u0027t automatically get the plugin name added, please indicate so. Thus, we can rather fix the corresponding code path in core Gerrit.",
+      "range": {
+        "startLine": 239,
+        "startChar": 83,
+        "endLine": 239,
+        "endChar": 93
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
