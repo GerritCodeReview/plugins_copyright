@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c84a4156_32575695",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T21:05:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb6d6f7e_514d8ee7",
+      "range": {
+        "startLine": 182,
+        "startChar": 6,
+        "endLine": 182,
+        "endChar": 48
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "92149dd7_149e245d",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 5
