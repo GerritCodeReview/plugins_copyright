@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f04c3c7c_5a937b03",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dca9287a_66688fec",
+      "range": {
+        "startLine": 106,
+        "startChar": 10,
+        "endLine": 106,
+        "endChar": 18
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cb6d6f7e_514d8ee7",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 5
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "795b4451_3166de84",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "92149dd7_149e245d",
+      "range": {
+        "startLine": 191,
+        "startChar": 4,
+        "endLine": 191,
+        "endChar": 39
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca25b986_d11ea870",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 5
@@ -91,6 +139,30 @@
       "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7962d26_1e3f0505",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca25b986_d11ea870",
+      "range": {
+        "startLine": 200,
+        "startChar": 2,
+        "endLine": 218,
+        "endChar": 3
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +235,78 @@
     },
     {
       "key": {
+        "uuid": "b3b3553a_dc4bbb70",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04cc45e4_30251446",
+      "range": {
+        "startLine": 235,
+        "startChar": 29,
+        "endLine": 235,
+        "endChar": 52
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec2d70d6_823ab78f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "67240c00_ca65914f",
+      "range": {
+        "startLine": 235,
+        "startChar": 13,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0144993e_ea8cc282",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done.\n\nSorry, it was debugging code I forgot to remove.",
+      "parentUuid": "49214eb7_d25422b1",
+      "range": {
+        "startLine": 235,
+        "startChar": 6,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d7bf46c_2dab719d",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 5
@@ -186,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "33dbea3c_db677f75",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d7bf46c_2dab719d",
+      "range": {
+        "startLine": 237,
+        "startChar": 6,
+        "endLine": 237,
+        "endChar": 74
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bfbfd222_5aeb1a8d",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 5
@@ -206,6 +374,30 @@
       "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90cb56db_d64b26d1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-05T06:29:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bfbfd222_5aeb1a8d",
+      "range": {
+        "startLine": 239,
+        "startChar": 83,
+        "endLine": 239,
+        "endChar": 93
+      },
+      "revId": "b7ce37604d23dae481dbd2931b2c30ce17fe880d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
