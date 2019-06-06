@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ca536f8_e5e9362a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Both of these parameters can be null. Please mark them with the com.google.gerrit.common.Nullable annotation so that IDEs and other systems have a chance to automatically mark unsafe usages.\n\nIn addition, can you please check that all usages are guarded against null values? (I at least saw a usage of checkConfig which might run into a NullPointerException.)",
+      "range": {
+        "startLine": 81,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 34
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fd1f10a_755e54a7",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Did I understand correctly that \"pluginEnabled\" doesn\u0027t indicate whether the plugin is enabled but whether found issues show up as warning or error lines while still blocking upload? What\u0027s the use case for this?",
+      "range": {
+        "startLine": 187,
+        "startChar": 8,
+        "endLine": 188,
+        "endChar": 93
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "893e49e9_b78d0ca0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Here and for other CommitValidationExceptions: Reading the relevant code paths correctly, this is the message presented to the user upon a failing git push. Was the message formulated with this in mind? Here, it might also make sense to add the plugin name (if you don\u0027t consider it PII and don\u0027t need to hide the name from users) as it\u0027s not automatically added. This would help in failure cases when users complain about a failing pushes and just mention \"project.config\", which could also apply to other Gerrit functionality.",
+      "range": {
+        "startLine": 196,
+        "startChar": 43,
+        "endLine": 196,
+        "endChar": 76
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5aa92ea_b8663f3f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Just double checking: Are you sure that you want to send the full exception message to users including maybe very technical aspects and potentially PII? (I didn\u0027t check all code paths to find out what could end up as message in a ConfigInvalidException but I know that it\u0027s also produced in JGit and it could potentially contain anything.)",
+      "range": {
+        "startLine": 200,
+        "startChar": 74,
+        "endLine": 200,
+        "endChar": 88
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f79beae5_ca5cebba",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Throwing an exception in a finally block is heavily discouraged as it will mask any other exceptions which were previously thrown in the try- and catch-blocks. Among other things, this can complicate debugging. Are you sure you want to do it this way?",
+      "range": {
+        "startLine": 216,
+        "startChar": 8,
+        "endLine": 216,
+        "endChar": 59
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2d0483d_8137b489",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "finally-blocks in Java have some special properties/behavior and are typically meant for closing resources. All of this code, especially the reviewApi.reportConfigMessages(..) call, represents a lot of work/logic. I\u0027m pretty sure that doing all of this inside of a finally-block could have some unintended side-effects. The above mentioned issue with exception masking is one of those. Can you please find a way such that this code is not called inside of a finally-block? (I can give you suggestions if you need those.)",
+      "range": {
+        "startLine": 281,
+        "startChar": 6,
+        "endLine": 301,
+        "endChar": 7
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3be7b489_39a0d9ab",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "This method should be marked with @Nullable.",
+      "range": {
+        "startLine": 357,
+        "startChar": 22,
+        "endLine": 357,
+        "endChar": 32
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6aac5b5c_ba1d815a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "This depends on which kind of error and message should be reported to the user. IllegalStateException would be an internal server error, represented by a 500. The kind of chosen RestApiException would determine the HTTP error code and the specified message would be sent to the user.",
+      "range": {
+        "startLine": 371,
+        "startChar": 6,
+        "endLine": 371,
+        "endChar": 55
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca0f6b3f_849e7fec",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "Is it guaranteed that this is not null? (I get a warning in my IDE and the Javadoc description of this parameter lets me think that it can indeed be null here.)",
+      "range": {
+        "startLine": 389,
+        "startChar": 54,
+        "endLine": 389,
+        "endChar": 70
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22f71ab7_7933b7c3",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "RevWalks must be closed after use. Please use a try-with-resources statement.",
+      "range": {
+        "startLine": 403,
+        "startChar": 4,
+        "endLine": 403,
+        "endChar": 35
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b1aaea2_68332acd",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-06T18:03:58Z",
+      "side": 1,
+      "message": "I don\u0027t know if this can happen for real but TreeWalk#forPath can return a null object if the file wasn\u0027t found, which would result in a NPE with the current code.",
+      "range": {
+        "startLine": 405,
+        "startChar": 9,
+        "endLine": 405,
+        "endChar": 39
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
