@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "0b6983df_6710768f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "Even after seeing more of the plugin, I haven\u0027t understood why it\u0027s necessary to read in the config at startup. This might cause some issues. Isn\u0027t it possible to read the settings from the config file whenever necessary instead of having this local memory state? Please shed some light on this.",
+      "range": {
+        "startLine": 115,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 3
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3fd1f10a_755e54a7",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -248,6 +271,188 @@
         "startChar": 9,
         "endLine": 405,
         "endChar": 39
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e9cdbe5_17c26aeb",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/lib/Archive.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it doesn\u0027t seem to be run as part of the plugin or interact with Gerrit in any way. (This class is only used by ScanTool.)",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e62b3e4_5f589a1a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/tools/AndroidScan.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it doesn\u0027t seem to be run as part of the plugin or interact with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15ba037e_57318b10",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/tools/ScanTool.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it doesn\u0027t seem to be run as part of the plugin or interact with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc37990_aea0af6c",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/tools/ScanTool.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "Passing on a warning from my IDE for this and the other input streams: This input stream is used without a try-with-resources statement (\u003d stream not closed).",
+      "range": {
+        "startLine": 319,
+        "startChar": 28,
+        "endLine": 319,
+        "endChar": 54
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fa9fc03_bf8ce000",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/lib/ArchiveTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it only encompasses tests for code which isn\u0027t run as part of the plugin or interacts with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be84776d_8bab6104",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/tools/AndroidScanTest.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it only encompasses tests for code which isn\u0027t run as part of the plugin or interacts with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0a25723_ce1228f5",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/copyright/tools/ScanToolTest.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it only encompasses tests for code which isn\u0027t run as part of the plugin or interacts with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f837e002_eb03723a",
+        "filename": "tools/android_scan.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it doesn\u0027t seem to be run as part of the plugin or interact with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e6f9a27_75eeb0de",
+        "filename": "tools/check_new_config.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "FYI: This is one of the classes I won\u0027t review as it doesn\u0027t seem to be run as part of the plugin or interact with Gerrit in any way.",
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "267aef20_8a75879a",
+        "filename": "tools/check_new_config.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2019-06-07T16:43:19Z",
+      "side": 1,
+      "message": "echo",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 10
       },
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
