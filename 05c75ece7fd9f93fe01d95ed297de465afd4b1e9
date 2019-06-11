@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "55643ce7_add28c92",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ca536f8_e5e9362a",
+      "range": {
+        "startLine": 81,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 34
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0b6983df_6710768f",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -45,6 +69,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d09f334e_dc5133d1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "It compiles a large regular expression. Using a configuration typical for Android hosts, on my specialist workstation with little or no other load, just compiling the regular expression averages 3.6ms\n\nOn a heavily loaded server running in prod, re-compiling for every change could add too much latency and cpu load.",
+      "parentUuid": "0b6983df_6710768f",
+      "range": {
+        "startLine": 115,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 3
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "64760978_7d5d1d63",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "It\u0027s both. Or rather, whether to treat errors as warnings is derived from whether the plugin is enabled on the host. If the plugin has been explicitly disabled on the server or is not yet enabled on the server, why would it make sense to block changes to the project.config ?\n\nConsider:\n\nScenario 1: While setting up the plugin, someone might want to push the patterns in a separate change from the account and group settings. Before the plugin is enabled, it makes sense to alert folks that things are not ready to enable the plugin until everything is in place, but I can think of neither a business case nor a technical reason to block partial configurations. \"All-or-nothing\" seems inappropriate.\n\nScenario 2: A new version of gerrit and the plugin get pushed to servers causing the plugin to report configuration errors for previously good configurations and blocking all changes to project.config. With this logic, it is possible for on-call to disable the plugin temporarily in the gerrit.config until the release can get fixed or rolled back. In the meantime, it will nag about the project.config changes, but it won\u0027t block anyone from dealing with an emergency.\n\n\nAfter the plugin is enabled on the server, it\u0027s a different story: An error in the configuration could interfere with normal operations so it\u0027s better to force the person pushing the change to fix the problem before letting it on the host.\n\nI changed CheckConfig.checkProjectConfig to clarify.",
+      "parentUuid": "3fd1f10a_755e54a7",
+      "range": {
+        "startLine": 187,
+        "startChar": 8,
+        "endLine": 188,
+        "endChar": 93
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "893e49e9_b78d0ca0",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -91,6 +163,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0a7558c_d93d129a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "893e49e9_b78d0ca0",
+      "range": {
+        "startLine": 196,
+        "startChar": 43,
+        "endLine": 196,
+        "endChar": 76
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "a19a1f7f_0dc834f9",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Yes, I am sure. The message for ConfigInvalidException contains the necessary context for what needs fixing. The messages are derived from the content of the pushed project.config revision so the person pushing the change and all of the reviewers necessarily have access to view those contents.\n\nFurther, assuming a new message, the content will derive from the diff, which will already be published on the review thread and via email.",
+      "parentUuid": "e5aa92ea_b8663f3f",
+      "range": {
+        "startLine": 200,
+        "startChar": 74,
+        "endLine": 200,
+        "endChar": 88
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f79beae5_ca5cebba",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -137,6 +257,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e14ffcd0_55ae2823",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f79beae5_ca5cebba",
+      "range": {
+        "startLine": 216,
+        "startChar": 8,
+        "endLine": 216,
+        "endChar": 59
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "0a33cb11_76a3bf0f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Ack\n\nIn this context, the risk and consequences of masking a runtime exception are minimal. And in any case, all of this code will change before deploying when the check gets moved to a background thread.",
+      "parentUuid": "e2d0483d_8137b489",
+      "range": {
+        "startLine": 281,
+        "startChar": 6,
+        "endLine": 301,
+        "endChar": 7
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3be7b489_39a0d9ab",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -183,6 +351,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "223e7057_897065b3",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3be7b489_39a0d9ab",
+      "range": {
+        "startLine": 357,
+        "startChar": 22,
+        "endLine": 357,
+        "endChar": 32
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "b6e7adca_a00d1197",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6aac5b5c_ba1d815a",
+      "range": {
+        "startLine": 371,
+        "startChar": 6,
+        "endLine": 371,
+        "endChar": 55
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca0f6b3f_849e7fec",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -229,6 +445,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "053971f1_1481e18d",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca0f6b3f_849e7fec",
+      "range": {
+        "startLine": 389,
+        "startChar": 54,
+        "endLine": 389,
+        "endChar": 70
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "d58444a5_b4c16fbc",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22f71ab7_7933b7c3",
+      "range": {
+        "startLine": 403,
+        "startChar": 4,
+        "endLine": 403,
+        "endChar": 35
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b1aaea2_68332acd",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
         "patchSetId": 7
@@ -275,6 +539,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "117bed7a_7c71a230",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightConfig.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Ack\n\nIf an IllegalStateException gets translated into a 500, I assume an NPE does too. That seems like the appropriate outcome given it would either mean a serious programming error or gerrit so badly broken it cannot find the files in the current revision.",
+      "parentUuid": "6b1aaea2_68332acd",
+      "range": {
+        "startLine": 405,
+        "startChar": 9,
+        "endLine": 405,
+        "endChar": 39
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -340,6 +628,30 @@
       "writtenOn": "2019-06-07T16:43:19Z",
       "side": 1,
       "message": "Passing on a warning from my IDE for this and the other input streams: This input stream is used without a try-with-resources statement (\u003d stream not closed).",
+      "range": {
+        "startLine": 319,
+        "startChar": 28,
+        "endLine": 319,
+        "endChar": 54
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd2e73c4_77cd1d35",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/tools/ScanTool.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Nevertheless, it would be an error to call close on these derived and possibly embedded streams. Is there a pragma or annotation we can use to make your IDE warning go away?",
+      "parentUuid": "1cc37990_aea0af6c",
       "range": {
         "startLine": 319,
         "startChar": 28,
@@ -457,6 +769,30 @@
       "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e0bee3b_22d4e5c1",
+        "filename": "tools/check_new_config.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-06-11T20:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "267aef20_8a75879a",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 10
+      },
+      "revId": "05c75ece7fd9f93fe01d95ed297de465afd4b1e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
