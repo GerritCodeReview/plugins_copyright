@@ -22,6 +22,7 @@ import com.google.gerrit.metrics.Field;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
+import com.google.gerrit.server.logging.Metadata;
 import com.google.inject.Singleton;
 import javax.inject.Inject;
 
@@ -55,8 +56,10 @@ class Metrics {
 
   @Inject
   Metrics(MetricMaker metricMaker) {
-    Field<String> project = Field.ofString("project", "project name");
-    Field<String> branch = Field.ofString("branch", "branch name");
+    Field<String> projectField =
+        Field.ofString("project", Metadata.Builder::indexName).description("project name").build();
+    Field<String> branchField =
+        Field.ofString("branch", Metadata.Builder::indexName).description("branch name").build();
 
     readConfigTimer =
         metricMaker.newTimer(
@@ -82,35 +85,35 @@ class Metrics {
             new Description("Number of failed attempts to post reviews")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     addReviewerErrors =
         metricMaker.newCounter(
             "add_reviewer_error_count",
             new Description("Number of failed attempts to add a reviewer")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     projectStateErrors =
         metricMaker.newCounter(
             "read_project_state_error_count",
             new Description("Number of failed attempts to read project state")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     projectConfigErrors =
         metricMaker.newCounter(
             "get_project_config_error_count",
             new Description("Number of failed attempts to get config from project state")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     configurationErrors =
         metricMaker.newCounter(
             "read_configuration_error_count",
             new Description("Number of failed attempts to read configuration")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     reviewCount =
         metricMaker.newCounter(
             "review_count",
@@ -131,19 +134,19 @@ class Metrics {
         metricMaker.newCounter(
             "review_count_by_project",
             new Description("Total number of posted reviews").setRate().setUnit("reviews"),
-            project);
+            projectField);
     commentCountByProject =
         metricMaker.newCounter(
             "comment_count_by_project",
             new Description("Total number of posted review comments").setRate().setUnit("comments"),
-            project);
+            projectField);
     reviewTimerByProject =
         metricMaker.newTimer(
             "review_latency_by_project",
             new Description("Time spent posting reviews to revisions")
                 .setCumulative()
                 .setUnit(Units.MICROSECONDS),
-            project);
+            projectField);
     scanRevisionTimer =
         metricMaker.newTimer(
             "scan_revision_latency",
@@ -160,54 +163,54 @@ class Metrics {
         metricMaker.newCounter(
             "scan_count_by_project",
             new Description("Total number of copyright scans").setRate().setUnit("scans"),
-            project);
+            projectField);
     scanRevisionTimerByProject =
         metricMaker.newTimer(
             "scan_revision_latency_by_project",
             new Description("Time spent scanning entire revisions")
                 .setCumulative()
                 .setUnit(Units.MILLISECONDS),
-            project);
+            projectField);
     scanFileTimerByProject =
         metricMaker.newTimer(
             "scan_file_latency_by_project",
             new Description("Time spent scanning each file")
                 .setCumulative()
                 .setUnit(Units.MICROSECONDS),
-            project);
+            projectField);
     scanCountByBranch =
         metricMaker.newCounter(
             "scan_count_by_branch",
             new Description("Total number of copyright scans").setRate().setUnit("scans"),
-            branch);
+            branchField);
     scanRevisionTimerByBranch =
         metricMaker.newTimer(
             "scan_revision_latency_by_branch",
             new Description("Time spent scanning entire revisions")
                 .setCumulative()
                 .setUnit(Units.MILLISECONDS),
-            branch);
+            branchField);
     scanFileTimerByBranch =
         metricMaker.newTimer(
             "scan_file_latency_by_branch",
             new Description("Time spent scanning each file")
                 .setCumulative()
                 .setUnit(Units.MICROSECONDS),
-            branch);
+            branchField);
     skippedReviewWarnings =
         metricMaker.newCounter(
             "skipped_scan_warning_count",
             new Description("Number revision scans skipped due to configuration problems")
                 .setRate()
                 .setUnit("warnings"),
-            project);
+            projectField);
     scanErrors =
         metricMaker.newCounter(
             "failed_scan_error_count",
             new Description("Number of failed attempts to scan revisions")
                 .setRate()
                 .setUnit("errors"),
-            project);
+            projectField);
     errors =
         metricMaker.newCounter(
             "error_count",
