@@ -33,6 +33,7 @@ import com.google.common.truth.Correspondence;
 import com.google.gerrit.extensions.api.changes.AddReviewerInput;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput;
+import com.google.gerrit.extensions.api.changes.ReviewerInfo;
 import com.google.gerrit.extensions.client.ReviewerState;
 import com.google.gerrit.reviewdb.client.Account;
 import com.google.gerrit.server.CurrentUser;
@@ -90,36 +91,55 @@ public class CopyrightReviewApiTest {
 
   @Test
   public void testAddReviewers_addNone() throws Exception {
+    ImmutableList<ReviewerInfo> priorReviewers = ImmutableList.of();
     ReviewInput ri = new ReviewInput();
-    ri = reviewApi.addReviewers(ri, ImmutableList.of(), ReviewerState.CC);
+    ri = reviewApi.addReviewers(priorReviewers, ri, ImmutableList.of(), ReviewerState.CC);
     assertThat(ri.reviewers).isNull();
-    ri = reviewApi.addReviewers(ri, ImmutableList.of(), ReviewerState.REVIEWER);
+    ri = reviewApi.addReviewers(priorReviewers, ri, ImmutableList.of(), ReviewerState.REVIEWER);
     assertThat(ri.reviewers).isNull();
   }
 
   @Test
   public void testAddReviewers_addCC() throws Exception {
+    ImmutableList<ReviewerInfo> priorReviewers = ImmutableList.of();
     ReviewInput ri = new ReviewInput();
-    ri = reviewApi.addReviewers(ri, ImmutableList.of("someone"), ReviewerState.CC);
+    ri = reviewApi.addReviewers(priorReviewers, ri, ImmutableList.of("someone"), ReviewerState.CC);
     assertThat(ri.reviewers).comparingElementsUsing(addressedTo()).containsExactly("CC:someone");
   }
 
   @Test
   public void testAddReviewers_addReviewer() throws Exception {
+    ImmutableList<ReviewerInfo> priorReviewers = ImmutableList.of();
     ReviewInput ri = new ReviewInput();
-    ri = reviewApi.addReviewers(ri, ImmutableList.of("someone"), ReviewerState.REVIEWER);
+    ri = reviewApi.addReviewers(
+        priorReviewers, ri, ImmutableList.of("someone"), ReviewerState.REVIEWER);
     assertThat(ri.reviewers)
         .comparingElementsUsing(addressedTo())
         .containsExactly("REVIEWER:someone");
   }
 
   @Test
+  public void testAddReviewers_addReviewerAlreadyCCd() throws Exception {
+    ImmutableList<ReviewerInfo> priorReviewers =
+        ImmutableList.of(ReviewerInfo.byEmail("someone", "someone@example.com"));
+    ReviewInput ri = new ReviewInput();
+    ri = reviewApi.addReviewers(
+        priorReviewers, ri, ImmutableList.of("someone"), ReviewerState.REVIEWER);
+    assertThat(ri.reviewers).isNull();
+  }
+
+  @Test
   public void testAddReviewers_addMultiple() throws Exception {
+    ImmutableList<ReviewerInfo> priorReviewers = ImmutableList.of();
     ReviewInput ri = new ReviewInput();
     ri =
         reviewApi.addReviewers(
-            ri, ImmutableList.of("someone", "someone else"), ReviewerState.REVIEWER);
-    ri = reviewApi.addReviewers(ri, ImmutableList.of("another", "and another"), ReviewerState.CC);
+            priorReviewers,
+            ri,
+            ImmutableList.of("someone", "someone else"),
+            ReviewerState.REVIEWER);
+    ri = reviewApi.addReviewers(
+        priorReviewers, ri, ImmutableList.of("another", "and another"), ReviewerState.CC);
     assertThat(ri.reviewers)
         .comparingElementsUsing(addressedTo())
         .containsExactly(

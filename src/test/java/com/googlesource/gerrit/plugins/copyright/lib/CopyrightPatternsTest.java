@@ -161,13 +161,13 @@ public class CopyrightPatternsTest {
       CopyrightPatterns.Rule rule = CopyrightPatterns.lookup.get(ruleName);
 
       if (rule.exclusions != null) {
-        assertThat(rules.excludePatterns).containsAllIn(rule.exclusions);
+        assertThat(rules.excludePatterns).containsAtLeastElementsIn(rule.exclusions);
       }
       if (rule.licenses != null) {
-        assertThat(rules.excludePatterns).containsAllIn(rule.licenses);
+        assertThat(rules.excludePatterns).containsAtLeastElementsIn(rule.licenses);
       }
       if (rule.owners != null) {
-        assertThat(rules.excludePatterns).containsAllIn(rule.owners);
+        assertThat(rules.excludePatterns).containsAtLeastElementsIn(rule.owners);
       }
     }
   }
