@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "418e0555_4677f4f3",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/copyright/CopyrightReviewApi.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1073305
+      },
+      "writtenOn": "2019-07-24T22:20:59Z",
+      "side": 1,
+      "message": "Check id as well in case configured with account id.",
+      "revId": "aabbfbfc46c5162257811108978e9ddfbbf88ca1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
