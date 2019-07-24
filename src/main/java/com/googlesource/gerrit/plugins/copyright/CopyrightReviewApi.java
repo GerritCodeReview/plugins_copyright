@@ -31,6 +31,7 @@ import com.google.gerrit.extensions.api.changes.ChangeApi;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput;
 import com.google.gerrit.extensions.api.changes.ReviewResult;
+import com.google.gerrit.extensions.api.changes.ReviewerInfo;
 import com.google.gerrit.extensions.client.Comment;
 import com.google.gerrit.extensions.client.ReviewerState;
 import com.google.gerrit.extensions.common.CommentInfo;
@@ -328,8 +329,9 @@ public class CopyrightReviewApi {
               .label(scannerConfig.reviewLabel, reviewRequired ? -1 : +2);
 
       if (reviewRequired) {
-        ri = addReviewers(ri, scannerConfig.ccs, ReviewerState.CC);
-        ri = addReviewers(ri, scannerConfig.reviewers, ReviewerState.REVIEWER);
+        List<ReviewerInfo> reviewers = cApi.reviewers();
+        ri = addReviewers(reviewers, ri, scannerConfig.ccs, ReviewerState.CC);
+        ri = addReviewers(reviewers, ri, scannerConfig.reviewers, ReviewerState.REVIEWER);
       }
       ImmutableMap.Builder<String, List<CommentInput>> comments = ImmutableMap.builder();
       if (reviewRequired) {
@@ -567,8 +569,15 @@ public class CopyrightReviewApi {
    * {@code reviewers} as {@code type} CC or REVIEWER.
    */
   @VisibleForTesting
-  ReviewInput addReviewers(ReviewInput ri, Iterable<String> reviewers, ReviewerState type) {
+  ReviewInput addReviewers(
+      List<ReviewerInfo> existingReviewers,
+      ReviewInput ri,
+      Iterable<String> reviewers,
+      ReviewerState type) {
     for (String reviewer : reviewers) {
+      if (containsReviewer(existingReviewers, reviewer)) {
+        continue;
+      }
       ri = ri.reviewer(reviewer, type, true);
     }
     return ri;
@@ -584,6 +593,24 @@ public class CopyrightReviewApi {
       if (Objects.equals(prior.line, ci.line)
           && Objects.equals(prior.range, ci.range)
           && Objects.equals(prior.message, ci.message)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Returns true if {@code priorReviewers} already includes {@code reviewer}. */
+  boolean containsReviewer(Iterable<? extends ReviewerInfo> priorReviewers, String reviewer) {
+    if (priorReviewers == null) {
+      return false;
+    }
+    for (ReviewerInfo prior : priorReviewers) {
+      if (Objects.equals(prior.username, reviewer) || Objects.equals(prior.name, reviewer)
+          || Objects.equals(prior.email, reviewer)
+          || Objects.equals(Integer.toString(prior._accountId), reviewer)) {
+        return true;
+      }
+      if (prior.secondaryEmails != null && prior.secondaryEmails.contains(reviewer)) {
         return true;
       }
     }
