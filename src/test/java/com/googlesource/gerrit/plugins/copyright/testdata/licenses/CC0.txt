@@ -1,0 +1,6 @@
+/*
+ * Written by People with assistance from members of Some Organization
+ * released to the public domain, as explained at
+ * http://creativecommons.org/publicdomain/zero/1.0/
+ * Other contributors include Other People
+ */

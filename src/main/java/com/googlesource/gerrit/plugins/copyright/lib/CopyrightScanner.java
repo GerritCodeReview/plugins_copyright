@@ -140,6 +140,7 @@ public final class CopyrightScanner {
    */
   private static final ImmutableList<String> CONTRACT_WORDS =
       ImmutableList.of(
+          "license>[-\\s\\p{Z}\\p{L}\\p{N}\\p{P}\\p{S}\\p{M}<>/#*.]{1,512}?</[^>]{0,25}licen[cs]e",
           "agree(?:s|d|ment)?",
           "amendments?",
           "applicable laws?",
@@ -692,12 +693,12 @@ public final class CopyrightScanner {
     sb.append(NAME);
     sb.append(WS);
     sb.append(
-        "{1,msl}){2,mnr}?licen[cs]e))[,.;]{0,3}(?![:])"); // end of 1st or 2nd captured match group
+        "{1,msl}){1,mnr}?licen[cs]e))[,.;]{0,3}(?![:])"); // end of 1st or 2nd captured match group
 
     // Other license captures. -- Line starting with License:
-    sb.append("|(?-ms:licen[cs]e:\\s{1,msl}("); // start of the 2nd or 3rd captured match group
+    sb.append("|(?-ms:licen[cs]e:[\\p{Z}\\s]{1,msl}("); // start of the 2nd or 3rd captured match group
     sb.append(NAME);
-    sb.append("(?:\\s{1,msl}");
+    sb.append("(?:[\\p{Z}\\s]{1,msl}");
     sb.append(NAME);
     sb.append("){0,mnr})\\n)"); // end of 2nd or 3rd captured match group
 
@@ -784,13 +785,13 @@ public final class CopyrightScanner {
     sb.append(")){0,5}"); // captures 0 to 5 additional author/owner declarations
 
     // Detect contract words to detect unknown licenses.
-    sb.append("|(?:(?:\\b|\\p{Pi})(?:"); // unknown licenses use non-capturing group
+    sb.append("|(?:(?:[<\\p{Pi}]|\\b)(?:"); // unknown licenses use non-capturing group
     sb.append(words);
     sb.append(")(?:");
     sb.append(WS);
     sb.append("(?:");
     sb.append(words);
-    sb.append(")){0,mnr}(?:\\b|[,.;:\\p{Pf}]))");
+    sb.append(")){0,mnr}(?:[>,.;:\\p{Pf}]|\\b))");
 
     return Pattern.compile(
         sb.toString()
@@ -894,7 +895,7 @@ public final class CopyrightScanner {
         "Capturing group found in /" + match + "/. Use non-capturing (?:...) instead of (...).");
     // Disallow spaces inside character classes because they will get replaced.
     Preconditions.checkArgument(
-        !match.matches(".*\\[[^]]*\\s[]].*"),
+        !match.matches(".*\\[[^]]*[\\s\\p{Z}][]].*"),
         "Character class with space in /" + match + "/. Use (?: |...) instead of space in [...].");
     // Replace unlimited "any char" wildcards that can cost too much backtracking with patterns that
     // match a smaller subset of characters with more limited quantifiers.
@@ -937,8 +938,10 @@ public final class CopyrightScanner {
                             + MAX_NAME_REPETITION
                             + "}")
                         .replace("\\", "\\\\"))
-                .replaceAll("\\s+[?]", WS.replace("\\", "\\\\") + "{0," + MAX_SPACE_LENGTH + "}")
-                .replaceAll("\\s+", WS.replace("\\", "\\\\") + "{1," + MAX_SPACE_LENGTH + "}")
+                .replaceAll(
+                    "[\\s\\p{Z}]+[?]", WS.replace("\\", "\\\\") + "{0," + MAX_SPACE_LENGTH + "}")
+                .replaceAll(
+                    "[\\s\\p{Z}]+", WS.replace("\\", "\\\\") + "{1," + MAX_SPACE_LENGTH + "}")
             + suffix,
         Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.DOTALL);
   }
@@ -952,7 +955,7 @@ public final class CopyrightScanner {
       return null;
     }
     StringBuilder sb = new StringBuilder();
-    Matcher m = Pattern.compile(URL).matcher(match);
+    Matcher m = Pattern.compile(URL + "|[<][/]").matcher(match); // URL or end-tag
     int nextIndex = 0;
     while (m.find()) {
       int start = m.start();

@@ -1,0 +1,5 @@
+/*
+ * License: Academic Free License 2.1
+ *
+ * SPDX-License-Identifier: AFL-2.1
+ */

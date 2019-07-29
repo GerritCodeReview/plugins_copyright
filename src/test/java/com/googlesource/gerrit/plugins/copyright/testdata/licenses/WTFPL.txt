@@ -1,0 +1,7 @@
+    <licenses>
+        <license>
+            <name>WTFPL</name>
+            <url>http://www.wtfpl.net/</url>
+        </license>
+    </licenses>
+
