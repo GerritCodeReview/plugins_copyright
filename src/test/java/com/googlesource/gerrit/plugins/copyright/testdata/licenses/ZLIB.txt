@@ -1,0 +1,3 @@
+ *  This library is distributed under the zlib license, which can be found
+ *  in the file "COPYING.txt".
+ *
