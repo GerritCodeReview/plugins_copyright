@@ -80,7 +80,7 @@ junit_tests(
 
 sh_test(
     name = "AndroidScanTest",
-    size = "small",
+    size = "medium",
     srcs = ["src/test/java/com/googlesource/gerrit/plugins/copyright/tools/AndroidScanTest.sh"],
     data = [
         ":android_scan",
