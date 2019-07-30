@@ -191,6 +191,7 @@ public final class CopyrightScanner {
           "notwithstanding",
           "obligations?",
           "otherwise agreed",
+          "patents?",
           "perpetu(?:al|ity)",
           "phonorecords?",
           "prior written",
