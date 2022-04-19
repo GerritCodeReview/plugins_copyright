@@ -33,6 +33,23 @@
       "message": "CHOOCHAT JUMPATHONG OWNERSHIP ",
       "revId": "81202d81ea1321dab6f335e482f4733e0b82a183",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91779dd9_de59b994",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1147523
+      },
+      "writtenOn": "2022-04-19T16:22:09Z",
+      "side": 1,
+      "message": "CHOOCHAT JUMPATHONG submit ",
+      "revId": "81202d81ea1321dab6f335e482f4733e0b82a183",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
